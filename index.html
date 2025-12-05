@@ -79,7 +79,6 @@
     .logo-wrap img{
       width:100%;height:100%;object-fit:cover;border-radius:50%;
     }
-
     .pill{
       background:var(--grad);
       color:#fff;font-weight:900;font-size:.85rem;
@@ -165,7 +164,13 @@
       content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;
       background:radial-gradient(circle, rgba(255,255,255,.45), transparent 60%);
       transform:rotate(18deg);
+      pointer-events:none; /* ✅ FIX: NIE blokuj klików */
     }
+    #showCodeBtn{
+      position:relative;
+      z-index:2; /* ✅ FIX: nad ozdobą */
+    }
+
     .points-count{font-size:2.5rem;font-weight:900;letter-spacing:.6px;line-height:1;}
     .points-sub{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;}
     .chip{
@@ -325,8 +330,71 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.danger{background:var(--danger)}
 
-    @media (max-width:560px){ .row{grid-template-columns:1fr} .quick-grid{grid-template-columns:1fr 1fr 1fr} }
-    @media (max-width:380px){ .quick-grid{grid-template-columns:1fr 1fr} .nav-wrap{gap:4px} }
+    /* ---------- MODAL / BOTTOM SHEET (Kod) ---------- */
+    .modal{position:fixed; inset:0; z-index:100; display:none;}
+    .modal.show{display:block;}
+
+    .modal-backdrop{
+      position:absolute; inset:0;
+      background:rgba(0,0,0,.35);
+      backdrop-filter: blur(2px);
+      animation:fadeBg .18s ease;
+    }
+    @keyframes fadeBg{from{opacity:0}to{opacity:1}}
+
+    .modal-sheet{
+      position:absolute; left:0; right:0; bottom:0;
+      background: var(--glass-strong);
+      border-radius: 22px 22px 0 0;
+      box-shadow: 0 -12px 40px rgba(0,0,0,.25);
+      padding: 10px 14px 18px;
+      transform: translateY(12px);
+      animation:sheetUp .22s ease forwards;
+    }
+    @keyframes sheetUp{to{transform:translateY(0)}}
+
+    .modal-handle{
+      width:46px; height:5px; border-radius:999px;
+      background:rgba(0,0,0,.12); margin:6px auto 10px;
+    }
+
+    .modal-header{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .modal-title{
+      font-weight:900; font-size:1.2rem;
+      background:var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+
+    .modal-close{
+      width:40px; height:40px; border-radius:12px; border:none; cursor:pointer;
+      background:#fff; display:grid; place-items:center;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .modal-code-box{
+      background:#0f0f0f; color:#fff;
+      border-radius:18px; padding:18px 14px;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.06);
+    }
+    .modal-code{
+      font-size:2.4rem; font-weight:900;
+      letter-spacing:10px; text-align:center;
+      font-variant-numeric: tabular-nums;
+    }
+    .modal-actions{ margin-top:10px; display:grid; gap:8px; }
+
+    @media (max-width:560px){
+      .row{grid-template-columns:1fr}
+      .quick-grid{grid-template-columns:1fr 1fr 1fr}
+    }
+    @media (max-width:380px){
+      .quick-grid{grid-template-columns:1fr 1fr}
+      .nav-wrap{gap:4px}
+    }
   </style>
 </head>
 <body>
@@ -337,7 +405,6 @@
   <div class="topbar">
     <div class="brand">
       <div class="logo-wrap">
-        <!-- Imgur direct image -->
         <img src="https://i.imgur.com/UNPIPSC.png" alt="Milko logo">
       </div>
       Milko
@@ -357,10 +424,13 @@
             <div class="chip"><i class="fa-solid fa-receipt"></i> 10 zł = 1 pkt</div>
           </div>
         </div>
-        <button class="btn btn-ghost btn-small" id="scanBtn">
-          <i class="fa-solid fa-qrcode"></i> Skanuj QR
+
+        <!-- PRZYCISK jak przy QR -->
+        <button class="btn btn-ghost btn-small" id="showCodeBtn">
+          <i class="fa-solid fa-id-card"></i> Pokaż kod
         </button>
       </div>
+
       <div class="progress"><div id="pointsProgress"></div></div>
 
       <div class="card">
@@ -396,7 +466,6 @@
         <div class="title">Nagrody</div>
         <p class="muted">Kliknij „Wymień”, a pokażemy Ci kod do odbioru w lokalu.</p>
       </div>
-
       <div class="card" id="rewardsList"></div>
     </section>
 
@@ -475,7 +544,6 @@
         <div class="title">Aktualności</div>
         <p class="muted">Nowości, promocje i ogłoszenia z MilkShake Bar.</p>
       </div>
-
       <div class="card stack" id="newsList"></div>
     </section>
 
@@ -579,6 +647,7 @@
         </div>
       </div>
     </section>
+
   </main>
 
   <!-- SUBPAGES -->
@@ -677,6 +746,42 @@
     <i class="fa-solid fa-check-circle"></i><span id="toastText"></span>
   </div>
 
+  <!-- MODAL: KOD LOJALNOŚCIOWY -->
+  <div id="codeModal" class="modal">
+    <div class="modal-backdrop" data-close></div>
+
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="codeTitle">
+      <div class="modal-handle"></div>
+
+      <div class="modal-header">
+        <div>
+          <div class="tiny">Twój kod lojalnościowy</div>
+          <div id="codeTitle" class="modal-title">Milko ID</div>
+        </div>
+        <button class="modal-close" data-close aria-label="Zamknij">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-code-box">
+        <div class="modal-code" id="loyaltyCode">000000</div>
+        <div class="tiny" style="opacity:.9;text-align:center;margin-top:6px;">
+          Pokaż obsłudze przy kasie
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-wide" id="copyCodeBtn">
+          <i class="fa-solid fa-copy"></i> Kopiuj kod
+        </button>
+      </div>
+
+      <p class="tiny" style="text-align:center;margin-top:8px;">
+        Kod jest stały i zawsze przypisany do Twojego konta.
+      </p>
+    </div>
+  </div>
+
   <script>
     // ---------- PWA: register SW ----------
     if ("serviceWorker" in navigator) {
@@ -719,7 +824,7 @@
       set(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
     };
 
-    // ---------- Clear points history ONCE (so it's empty now) ----------
+    // ---------- Clear points history ONCE ----------
     (function clearHistoryOnce(){
       const didClear = store.get("didClearHistoryOnce", false);
       if(!didClear){
@@ -727,6 +832,48 @@
         store.set("didClearHistoryOnce", true);
       }
     })();
+
+    // -------- 6-cyfrowy kod STAŁY (nie jednorazowy) + modal --------
+    const loyaltyCodeEl = document.getElementById("loyaltyCode");
+    const showCodeBtn   = document.getElementById("showCodeBtn");
+    const copyCodeBtn   = document.getElementById("copyCodeBtn");
+    const codeModal     = document.getElementById("codeModal");
+
+    function generate6DigitCode(){
+      return String(Math.floor(100000 + Math.random() * 900000));
+    }
+    function getOrCreateLoyaltyCode(){
+      let code = store.get("loyaltyCode", null);
+      if(!code || String(code).length !== 6){
+        code = generate6DigitCode();
+        store.set("loyaltyCode", code);
+      }
+      return String(code);
+    }
+    function renderLoyaltyCode(){
+      loyaltyCodeEl.textContent = getOrCreateLoyaltyCode();
+    }
+    function openCodeModal(){
+      renderLoyaltyCode();
+      codeModal.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+    function closeCodeModal(){
+      codeModal.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+    showCodeBtn?.addEventListener("click", openCodeModal);
+    codeModal?.querySelectorAll("[data-close]").forEach(el=> el.addEventListener("click", closeCodeModal));
+
+    copyCodeBtn?.addEventListener("click", async ()=>{
+      const code = loyaltyCodeEl.textContent;
+      try{
+        await navigator.clipboard.writeText(code);
+        showToast("Kod skopiowany ✅");
+      }catch{
+        showToast("Nie udało się skopiować 🤏", true);
+      }
+    });
 
     // ---------- Points ----------
     const pointsCountEl = document.getElementById("pointsCount");
@@ -754,10 +901,6 @@
             </div>
            </div>`;
     }
-
-    document.getElementById("scanBtn").addEventListener("click", ()=>{
-      showToast("Skaner QR — do podpięcia z backendem 😉");
-    });
 
     // ---------- Rewards ----------
     const rewards = [
