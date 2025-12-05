@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>MilkShake Bar PWA</title>
+  <title>Milko</title>
 
   <meta name="theme-color" content="#FF6A00" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -24,9 +24,10 @@
       --white:#fff;
       --grad:linear-gradient(135deg,var(--primary),var(--secondary));
       --radius:20px;
-      --shadow:0 12px 34px rgba(0,0,0,.12);
-      --glass:rgba(255,255,255,.78);
-      --glass-strong:rgba(255,255,255,.95);
+      --shadow:0 14px 40px rgba(0,0,0,.12);
+      --shadow-soft:0 8px 22px rgba(0,0,0,.08);
+      --glass:rgba(255,255,255,.82);
+      --glass-strong:rgba(255,255,255,.97);
       --success:#16A34A;
       --danger:#DC2626;
       --link:#8a3d00;
@@ -40,37 +41,45 @@
       color:var(--text);
       min-height:100vh;
       -webkit-font-smoothing:antialiased;
-      padding-bottom: calc(118px + var(--safe-bottom)); /* miejsce na dolne menu */
+      padding-bottom: calc(118px + var(--safe-bottom));
     }
 
     /* Decorative blobs */
     .blob{
-      position:fixed;z-index:-1;filter:blur(60px);opacity:.35;
-      width:260px;height:260px;border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, #ffd1a8, transparent 60%), var(--grad);
+      position:fixed;z-index:-1;filter:blur(70px);opacity:.33;
+      width:280px;height:280px;border-radius:50%;
+      background:
+        radial-gradient(circle at 30% 30%, #ffe1c7, transparent 60%),
+        var(--grad);
     }
-    .blob.b1{top:-60px;left:-60px}
-    .blob.b2{bottom:-90px;right:-70px;transform:rotate(25deg)}
+    .blob.b1{top:-70px;left:-70px}
+    .blob.b2{bottom:-110px;right:-90px;transform:rotate(25deg)}
 
-    /* App shell topbar */
+    /* Topbar */
     .topbar{
       position:sticky;top:0;z-index:20;
       padding: calc(10px + var(--safe-top)) 14px 10px;
-      background:rgba(255,246,236,.94);
-      backdrop-filter:blur(14px);
+      background:rgba(255,246,236,.96);
+      backdrop-filter:blur(16px);
       border-bottom:1px solid rgba(0,0,0,.06);
       display:flex;align-items:center;justify-content:space-between;
     }
     .brand{
       display:flex;align-items:center;gap:10px;font-weight:900;
-      font-size:1.05rem;letter-spacing:.2px;
+      font-size:1.08rem;letter-spacing:.2px;
     }
-    .brand .dot{
-      width:36px;height:36px;border-radius:12px;
-      background:var(--grad);
-      display:grid;place-items:center;color:#fff;
-      box-shadow:0 6px 16px rgba(255,106,0,.5);
+    .logo-wrap{
+      width:40px;height:40px;border-radius:50%;
+      background:rgba(255,255,255,.9);
+      display:grid;place-items:center;
+      box-shadow:var(--shadow-soft);
+      border:2px solid rgba(255,255,255,.9);
+      overflow:hidden;
     }
+    .logo-wrap img{
+      width:100%;height:100%;object-fit:cover;border-radius:50%;
+    }
+
     .pill{
       background:var(--grad);
       color:#fff;font-weight:900;font-size:.85rem;
@@ -84,15 +93,11 @@
     .stack{display:flex;flex-direction:column;gap:12px;}
     .card{
       background:var(--glass);
-      backdrop-filter:blur(12px);
-      border:1px solid rgba(255,255,255,.95);
-      border-radius:var(--radius);
+      backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.98);
+      border-radius:22px;
       box-shadow:var(--shadow);
       padding:16px;
-    }
-    .card.soft{
-      background:rgba(255,255,255,.6);
-      border-style:dashed;
     }
     .title{
       font-size:1.6rem;font-weight:900;
@@ -102,21 +107,8 @@
       margin-bottom:6px;
     }
     .subtitle{font-weight:900;margin-bottom:8px;font-size:1.05rem;}
-    .muted{opacity:.8;font-size:.95rem;line-height:1.55}
+    .muted{opacity:.82;font-size:.95rem;line-height:1.55}
     .tiny{font-size:.82rem;opacity:.7}
-
-    /* Section header (mobile feel) */
-    .section-head{
-      display:flex;align-items:center;justify-content:space-between;
-      margin:2px 2px 8px;
-    }
-    .section-head h3{
-      font-size:1.15rem;font-weight:900;
-    }
-    .section-head .badge{
-      font-size:.8rem;font-weight:900;padding:6px 10px;border-radius:999px;
-      background:rgba(0,0,0,.05);
-    }
 
     /* Inputs */
     label{font-size:.9rem;font-weight:900;margin:8px 0 6px;display:block}
@@ -133,9 +125,7 @@
       transform:translateY(-1px);
     }
     textarea{min-height:84px;resize:vertical}
-
     .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 
     .btn{
       border:none;cursor:pointer;font-weight:900;border-radius:16px;
@@ -150,18 +140,14 @@
       box-shadow:0 8px 22px rgba(255,106,0,.5);
     }
     .btn-ghost{
-      background:rgba(255,255,255,.9);
+      background:rgba(255,255,255,.92);
       border:1px solid rgba(0,0,0,.06);
       color:var(--text);
-    }
-    .btn-dark{
-      background:#111;color:#fff;border:1px solid #000;
-      box-shadow:0 8px 22px rgba(0,0,0,.22);
     }
     .btn-small{padding:8px 10px;font-size:.9rem;border-radius:12px}
     .btn-wide{width:100%;}
 
-    /* Tabs + transitions */
+    /* Tabs */
     .tab{display:none;animation:fade .22s ease}
     .tab.active{display:block}
     @keyframes fade{
@@ -171,20 +157,20 @@
 
     /* Points hero */
     .points-hero{
-      background:var(--grad);color:#fff;border-radius:20px;padding:16px;
+      background:var(--grad);color:#fff;border-radius:22px;padding:16px;
       display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
       box-shadow:var(--shadow);position:relative;overflow:hidden;
     }
     .points-hero::after{
-      content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
+      content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;
       background:radial-gradient(circle, rgba(255,255,255,.45), transparent 60%);
       transform:rotate(18deg);
     }
-    .points-count{font-size:2.4rem;font-weight:900;letter-spacing:.6px;line-height:1;}
+    .points-count{font-size:2.5rem;font-weight:900;letter-spacing:.6px;line-height:1;}
     .points-sub{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;}
     .chip{
       background:rgba(255,255,255,.2);
-      padding:6px 9px;border-radius:999px;font-weight:900;font-size:.8rem;
+      padding:6px 10px;border-radius:999px;font-weight:900;font-size:.82rem;
       display:inline-flex;gap:6px;align-items:center;
     }
     .progress{margin-top:10px;background:rgba(255,255,255,.24);height:10px;border-radius:999px;overflow:hidden;}
@@ -194,14 +180,14 @@
     .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
     .quick{
       background:var(--glass-strong);border:1px solid rgba(0,0,0,.04);
-      border-radius:16px;padding:12px;display:grid;gap:6px;place-items:center;text-align:center;
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      border-radius:18px;padding:12px;display:grid;gap:6px;place-items:center;text-align:center;
+      box-shadow:var(--shadow-soft);
       transition:.2s transform,.2s box-shadow;
       -webkit-tap-highlight-color: transparent;
     }
     .quick:active{transform:translateY(1px)}
     .quick i{
-      width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+      width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
       background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(255,106,0,.45);
       font-size:1.1rem;
     }
@@ -212,7 +198,7 @@
     .reward{
       display:flex;gap:12px;align-items:center;justify-content:space-between;
       background:var(--glass-strong);border-radius:18px;padding:12px;
-      border:1px solid rgba(0,0,0,.04);box-shadow:0 6px 18px rgba(0,0,0,.06);
+      border:1px solid rgba(0,0,0,.04);box-shadow:var(--shadow-soft);
     }
     .reward-left{display:flex;gap:12px;align-items:center;}
     .reward-ico{
@@ -225,7 +211,7 @@
     /* News */
     .news{
       background:var(--glass-strong);border-radius:18px;padding:12px;border:1px solid rgba(0,0,0,.04);
-      box-shadow:0 6px 18px rgba(0,0,0,.06);
+      box-shadow:var(--shadow-soft);
     }
     .news h4{font-size:1.05rem;margin-bottom:6px;font-weight:900}
     .news .date{font-size:.82rem;opacity:.65;margin-bottom:6px}
@@ -239,9 +225,7 @@
     .divider{height:1px;background:rgba(0,0,0,.06);margin:4px 0 0;}
 
     /* Account UI */
-    .account-hero{
-      display:flex;gap:12px;align-items:center;
-    }
+    .account-hero{display:flex;gap:12px;align-items:center;}
     .avatar{
       width:56px;height:56px;border-radius:16px;background:var(--grad);display:grid;place-items:center;
       color:#fff;font-size:1.3rem;font-weight:900;box-shadow:0 8px 20px rgba(255,106,0,.5);
@@ -249,15 +233,12 @@
     .account-name{font-weight:900;font-size:1.1rem}
     .account-mail{font-size:.9rem;opacity:.75}
 
-    .list{
-      display:flex;flex-direction:column;gap:8px;
-    }
+    .list{display:flex;flex-direction:column;gap:8px;}
     .list-item{
       background:var(--glass-strong);border:1px solid rgba(0,0,0,.04);
       padding:12px;border-radius:16px;display:flex;align-items:center;justify-content:space-between;
-      box-shadow:0 6px 16px rgba(0,0,0,.06);
-      cursor:pointer;transition:.2s transform,.2s box-shadow;
-      -webkit-tap-highlight-color: transparent;
+      box-shadow:var(--shadow-soft);
+      cursor:pointer;transition:.2s transform,.2s box-shadow;-webkit-tap-highlight-color: transparent;
     }
     .list-item:active{transform:translateY(1px)}
     .list-left{display:flex;gap:10px;align-items:center;}
@@ -268,40 +249,26 @@
     .li-title{font-weight:900}
     .li-sub{font-size:.85rem;opacity:.7}
 
-    /* Auth modal/page */
-    .auth-wrap{
-      display:grid;gap:10px;
-    }
-    .auth-btn{
-      width:100%;justify-content:center;font-weight:900;
-    }
+    /* Auth */
+    .auth-wrap{display:grid;gap:10px;}
+    .auth-btn{width:100%;justify-content:center;font-weight:900;}
     .auth-btn.google{background:#fff;border:2px solid #eee;}
     .auth-btn.apple{background:#111;color:#fff;}
-    .auth-sep{
-      display:flex;align-items:center;gap:10px;margin:6px 0;
-    }
-    .auth-sep::before,.auth-sep::after{
-      content:"";flex:1;height:1px;background:rgba(0,0,0,.08);
-    }
+    .auth-sep{display:flex;align-items:center;gap:10px;margin:6px 0;}
+    .auth-sep::before,.auth-sep::after{content:"";flex:1;height:1px;background:rgba(0,0,0,.08);}
     .auth-sep span{font-size:.85rem;opacity:.7;font-weight:800;}
 
-    /* Subpages inside account */
+    /* Subpages */
     .subpage{
-      position:fixed;inset:0;background:var(--bg);z-index:80;
-      display:none;flex-direction:column;
-      animation:slideIn .25s ease;
-      padding-bottom: calc(20px + var(--safe-bottom));
+      position:fixed;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;
+      animation:slideIn .25s ease;padding-bottom: calc(20px + var(--safe-bottom));
     }
     .subpage.active{display:flex;}
-    @keyframes slideIn{
-      from{opacity:0;transform:translateX(8px)}
-      to{opacity:1;transform:none}
-    }
+    @keyframes slideIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
     .sub-top{
       position:sticky;top:0;z-index:5;
       padding: calc(10px + var(--safe-top)) 14px 10px;
-      background:rgba(255,246,236,.96);
-      backdrop-filter:blur(12px);
+      background:rgba(255,246,236,.96);backdrop-filter:blur(12px);
       border-bottom:1px solid rgba(0,0,0,.06);
       display:flex;align-items:center;gap:10px;
     }
@@ -311,7 +278,7 @@
     }
     .sub-title{font-weight:900;font-size:1.05rem}
 
-    /* Empty state */
+    /* Empty */
     .empty{
       background:var(--glass-strong);padding:14px;border-radius:16px;border:1px dashed rgba(0,0,0,.07);
       display:flex;gap:12px;align-items:center;
@@ -321,16 +288,15 @@
       box-shadow:0 6px 14px rgba(255,106,0,.4);
     }
 
-    /* Bottom floating nav */
+    /* Bottom nav */
     .bottom-nav{
-      position:fixed;left:0;right:0;bottom:10px;z-index:50;
-      display:flex;justify-content:center;pointer-events:none;
+      position:fixed;left:0;right:0;bottom:10px;z-index:50;display:flex;justify-content:center;pointer-events:none;
     }
     .nav-wrap{
       pointer-events:auto;
       width:min(820px,calc(100% - 18px));
-      background:rgba(255,255,255,.8);
-      backdrop-filter:blur(14px);
+      background:rgba(255,255,255,.85);
+      backdrop-filter:blur(16px);
       border:1px solid rgba(255,255,255,.98);
       box-shadow:0 10px 28px rgba(0,0,0,.18);
       border-radius:999px;padding:6px;
@@ -339,18 +305,19 @@
     .nav-btn{
       background:transparent;border:none;cursor:pointer;border-radius:999px;
       padding:9px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;
-      font-weight:900;color:var(--text);opacity:.7;transition:.2s all;
-      -webkit-tap-highlight-color: transparent;
+      font-weight:900;color:var(--text);opacity:.7;transition:.2s all;-webkit-tap-highlight-color: transparent;
     }
     .nav-btn i{font-size:1.12rem}
     .nav-btn.active{
-      background:var(--grad);color:#fff;opacity:1;transform:translateY(-2px);box-shadow:0 8px 18px rgba(255,106,0,.45);
+      background:var(--grad);color:#fff;opacity:1;transform:translateY(-2px);
+      box-shadow:0 8px 18px rgba(255,106,0,.45);
     }
     .nav-btn .lbl{font-size:.73rem;line-height:1}
 
     /* Toast */
     .toast{
-      position:fixed;left:50%;bottom: calc(126px + var(--safe-bottom));transform:translateX(-50%) translateY(8px);
+      position:fixed;left:50%;bottom: calc(126px + var(--safe-bottom));
+      transform:translateX(-50%) translateY(8px);
       background:var(--success);color:#fff;font-weight:900;font-size:.95rem;
       padding:10px 14px;border-radius:999px;box-shadow:0 10px 25px rgba(0,0,0,.25);
       opacity:0;pointer-events:none;transition:.25s;z-index:999;display:flex;gap:8px;align-items:center;
@@ -358,14 +325,8 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.danger{background:var(--danger)}
 
-    @media (max-width:560px){
-      .row,.row-3{grid-template-columns:1fr}
-      .quick-grid{grid-template-columns:1fr 1fr 1fr}
-    }
-    @media (max-width:380px){
-      .quick-grid{grid-template-columns:1fr 1fr}
-      .nav-wrap{gap:4px}
-    }
+    @media (max-width:560px){ .row{grid-template-columns:1fr} .quick-grid{grid-template-columns:1fr 1fr 1fr} }
+    @media (max-width:380px){ .quick-grid{grid-template-columns:1fr 1fr} .nav-wrap{gap:4px} }
   </style>
 </head>
 <body>
@@ -375,8 +336,11 @@
   <!-- TOPBAR -->
   <div class="topbar">
     <div class="brand">
-      <div class="dot"><i class="fa-solid fa-ice-cream"></i></div>
-      MilkShake Bar
+      <div class="logo-wrap">
+        <!-- Imgur direct image -->
+        <img src="https://i.imgur.com/UNPIPSC.png" alt="Milko logo">
+      </div>
+      Milko
     </div>
     <div class="pill"><i class="fa-solid fa-star"></i> <span id="pointsPill">0 pkt</span></div>
   </div>
@@ -390,8 +354,7 @@
           <div class="tiny">Twoje punkty</div>
           <div class="points-count" id="pointsCount">0</div>
           <div class="points-sub">
-            <div class="chip"><i class="fa-solid fa-receipt"></i> 1 zł = 1 pkt</div>
-            <div class="chip"><i class="fa-solid fa-gift"></i> nagrody od 80 pkt</div>
+            <div class="chip"><i class="fa-solid fa-receipt"></i> 10 zł = 1 pkt</div>
           </div>
         </div>
         <button class="btn btn-ghost btn-small" id="scanBtn">
@@ -419,18 +382,6 @@
             <span>Nowości i promo</span>
           </button>
         </div>
-      </div>
-
-      <div class="card soft">
-        <div class="subtitle">Dodaj punkty ręcznie (testowo)</div>
-        <div class="row-3">
-          <button class="btn btn-primary" data-add="5">+5 pkt</button>
-          <button class="btn btn-primary" data-add="10">+10 pkt</button>
-          <button class="btn btn-primary" data-add="25">+25 pkt</button>
-        </div>
-        <p class="muted" style="margin-top:8px">
-          Docelowo: punkty z QR / paragonu od obsługi.
-        </p>
       </div>
 
       <div class="card">
@@ -530,7 +481,6 @@
 
     <!-- TAB: KONTO -->
     <section id="tab-account" class="tab">
-      <!-- if not logged -->
       <div id="accountLoggedOut" class="stack">
         <div class="card">
           <div class="title">Konto</div>
@@ -544,7 +494,7 @@
             <i class="fa-brands fa-google"></i> Kontynuuj z Google
           </button>
 
-          <button class="btn auth-btn apple" id="loginApple">
+          <button class="btn auth-btn apple" id="loginApple" style="background:#111;color:#fff;">
             <i class="fa-brands fa-apple"></i> Kontynuuj z Apple ID
           </button>
 
@@ -562,15 +512,13 @@
             <button class="btn btn-primary btn-wide">
               Zaloguj się <i class="fa-solid fa-right-to-bracket"></i>
             </button>
-            <p class="tiny">Nie masz konta? <span style="font-weight:900;color:var(--link)">Załóż je w lokalu</span></p>
           </form>
         </div>
       </div>
 
-      <!-- if logged -->
       <div id="accountLoggedIn" class="stack" style="display:none">
         <div class="card account-hero">
-          <div class="avatar" id="avatar">MS</div>
+          <div class="avatar" id="avatar">MK</div>
           <div>
             <div class="account-name" id="accName">Użytkownik</div>
             <div class="account-mail" id="accEmail">user@mail.com</div>
@@ -633,7 +581,7 @@
     </section>
   </main>
 
-  <!-- SUBPAGES (Account) -->
+  <!-- SUBPAGES -->
   <section class="subpage" id="page-personal">
     <div class="sub-top">
       <button class="back-btn" data-back><i class="fa-solid fa-arrow-left"></i></button>
@@ -653,11 +601,8 @@
           <label>Email</label>
           <input id="personalEmail" placeholder="mail@adres.com">
         </div>
-        <button class="btn btn-primary btn-wide" id="savePersonalBtn">
-          Zapisz zmiany
-        </button>
+        <button class="btn btn-primary btn-wide" id="savePersonalBtn">Zapisz zmiany</button>
       </div>
-      <p class="tiny">Dane są lokalne (localStorage). Po podpięciu backendu będą synchronizowane.</p>
     </div>
   </section>
 
@@ -668,14 +613,9 @@
     </div>
     <div class="container stack">
       <div class="card stack">
-        <button class="btn btn-ghost btn-wide" data-lang="pl">
-          🇵🇱 Polski
-        </button>
-        <button class="btn btn-ghost btn-wide" data-lang="en">
-          🇬🇧 English
-        </button>
+        <button class="btn btn-ghost btn-wide" data-lang="pl">🇵🇱 Polski</button>
+        <button class="btn btn-ghost btn-wide" data-lang="en">🇬🇧 English</button>
       </div>
-      <p class="tiny">Na razie tylko wybór języka. Teksty podmienimy, gdy chcesz.</p>
     </div>
   </section>
 
@@ -691,26 +631,6 @@
           Kremowe milkshake’i, desery i burgery w Słupsku oraz Rowach.
           Tworzymy miejsce pełne energii i słodkich wspomnień.
         </p>
-        <div class="stack" style="margin-top:10px">
-          <div class="list-item" style="cursor:default">
-            <div class="list-left">
-              <div class="li-ico"><i class="fa-solid fa-location-dot"></i></div>
-              <div>
-                <div class="li-title">Słupsk</div>
-                <div class="li-sub">Szczecińska 17</div>
-              </div>
-            </div>
-          </div>
-          <div class="list-item" style="cursor:default">
-            <div class="list-left">
-              <div class="li-ico"><i class="fa-solid fa-location-dot"></i></div>
-              <div>
-                <div class="li-title">Rowy</div>
-                <div class="li-sub">Wydmowa 2</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -722,55 +642,32 @@
     </div>
     <div class="container stack">
       <div class="card stack">
-        <div class="subtitle">Kontakt</div>
-        <p class="muted">
-          Jeśli potrzebujesz pomocy z rezerwacją lub punktami, zapytaj obsługę w lokalu
-          lub skontaktuj się telefonicznie.
-        </p>
-        <div class="list-item" style="cursor:default">
-          <div class="list-left">
-            <div class="li-ico"><i class="fa-solid fa-phone"></i></div>
-            <div>
-              <div class="li-title">Telefon</div>
-              <div class="li-sub">+48 733 033 100</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="subtitle" style="margin-top:8px">Developer aplikacji</div>
-        <p class="muted">
-          Aplikacja została wykonana przez <b>Velorie Design</b>.
-        </p>
+        <div class="subtitle">Developer aplikacji</div>
+        <p class="muted">Aplikacja została wykonana przez <b>Velorie Design</b>.</p>
         <a class="btn btn-primary btn-wide" href="https://www.desing.velorie.pl" target="_blank" rel="noopener">
-          Przejdź do strony developera
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          www.desing.velorie.pl <i class="fa-solid fa-arrow-up-right-from-square"></i>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Bottom floating nav -->
+  <!-- Bottom nav -->
   <nav class="bottom-nav" aria-label="Dolne menu">
     <div class="nav-wrap">
       <button class="nav-btn active" data-tab="points">
-        <i class="fa-solid fa-star"></i>
-        <div class="lbl">Punkty</div>
+        <i class="fa-solid fa-star"></i><div class="lbl">Punkty</div>
       </button>
       <button class="nav-btn" data-tab="rewards">
-        <i class="fa-solid fa-gift"></i>
-        <div class="lbl">Nagrody</div>
+        <i class="fa-solid fa-gift"></i><div class="lbl">Nagrody</div>
       </button>
       <button class="nav-btn" data-tab="res">
-        <i class="fa-solid fa-calendar-check"></i>
-        <div class="lbl">Rezerwacje</div>
+        <i class="fa-solid fa-calendar-check"></i><div class="lbl">Rezerwacje</div>
       </button>
       <button class="nav-btn" data-tab="news">
-        <i class="fa-solid fa-bolt"></i>
-        <div class="lbl">News</div>
+        <i class="fa-solid fa-bolt"></i><div class="lbl">News</div>
       </button>
       <button class="nav-btn" data-tab="account">
-        <i class="fa-solid fa-user"></i>
-        <div class="lbl">Konto</div>
+        <i class="fa-solid fa-user"></i><div class="lbl">Konto</div>
       </button>
     </div>
   </nav>
@@ -801,11 +698,7 @@
       window.scrollTo({top:0, behavior:"smooth"});
     }
     navButtons.forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.tab)));
-
-    // quick actions
-    document.querySelectorAll("[data-go]").forEach(b=>{
-      b.addEventListener("click", ()=> openTab(b.dataset.go));
-    });
+    document.querySelectorAll("[data-go]").forEach(b=> b.addEventListener("click", ()=> openTab(b.dataset.go)));
 
     // ---------- Toast ----------
     const toast = document.getElementById("toast");
@@ -825,6 +718,15 @@
       },
       set(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
     };
+
+    // ---------- Clear points history ONCE (so it's empty now) ----------
+    (function clearHistoryOnce(){
+      const didClear = store.get("didClearHistoryOnce", false);
+      if(!didClear){
+        store.set("pointsHistory", []);
+        store.set("didClearHistoryOnce", true);
+      }
+    })();
 
     // ---------- Points ----------
     const pointsCountEl = document.getElementById("pointsCount");
@@ -847,25 +749,11 @@
         : `<div class="empty">
             <div class="icon"><i class="fa-solid fa-clock"></i></div>
             <div>
-              <b>Tu pojawi się historia punktów</b>
-              <div class="tiny">Za pierwsze zakupy punkty naliczą się automatycznie.</div>
+              <b>Historia punktów jest pusta</b>
+              <div class="tiny">Punkty pojawią się po pierwszym naliczeniu.</div>
             </div>
            </div>`;
     }
-
-    function addPoints(amount, reason="Dodano punkty"){
-      const pts = store.get("points", 0) + amount;
-      store.set("points", pts);
-      const hist = store.get("pointsHistory", []);
-      hist.unshift({ text: `${reason}: +${amount} pkt`, date: new Date().toLocaleString("pl-PL") });
-      store.set("pointsHistory", hist.slice(0, 50));
-      renderPoints(); renderRewards();
-      showToast(`Dodano ${amount} pkt 🧡`);
-    }
-
-    document.querySelectorAll("[data-add]").forEach(btn=>{
-      btn.addEventListener("click", ()=> addPoints(Number(btn.dataset.add), "Testowe naliczenie"));
-    });
 
     document.getElementById("scanBtn").addEventListener("click", ()=>{
       showToast("Skaner QR — do podpięcia z backendem 😉");
@@ -905,7 +793,6 @@
           </div>
         `;
       }).join("");
-
       rewardsListEl.querySelectorAll("[data-redeem]").forEach(btn=>{
         btn.addEventListener("click", ()=> redeemReward(btn.dataset.redeem));
       });
@@ -917,9 +804,11 @@
       const pts = store.get("points", 0);
       if(pts < r.cost){ showToast("Masz za mało punktów 😅", true); return; }
       store.set("points", pts - r.cost);
+
       const hist = store.get("pointsHistory", []);
       hist.unshift({ text: `Wymieniono: -${r.cost} pkt (${r.title})`, date: new Date().toLocaleString("pl-PL") });
       store.set("pointsHistory", hist);
+
       renderPoints(); renderRewards();
       showToast(`Nagroda odebrana: ${r.title} 🎁`);
       openTab("rewards");
@@ -1003,112 +892,86 @@
       dateInput.min = iso;
     })();
 
-    // ---------- Account / Auth (UI + local demo) ----------
+    // ---------- Account / Auth ----------
     const loggedOutEl = document.getElementById("accountLoggedOut");
     const loggedInEl  = document.getElementById("accountLoggedIn");
     const avatarEl = document.getElementById("avatar");
     const accNameEl = document.getElementById("accName");
     const accEmailEl = document.getElementById("accEmail");
 
-    function setUser(user){
-      store.set("user", user);
-      renderAccount();
-    }
+    function setUser(user){ store.set("user", user); renderAccount(); }
     function renderAccount(){
       const user = store.get("user", null);
       const isLogged = !!user;
       loggedOutEl.style.display = isLogged ? "none" : "flex";
       loggedInEl.style.display  = isLogged ? "flex" : "none";
       if(isLogged){
-        const initials = (user.name || "MilkShake User").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+        const initials = (user.name || "Milko User").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
         avatarEl.textContent = initials;
         accNameEl.textContent = user.name || "Użytkownik";
         accEmailEl.textContent = user.email || "";
       }
     }
 
-    // Placeholder handlers:
     document.getElementById("loginGoogle").addEventListener("click", ()=>{
-      // TODO: tu podpinasz Google OAuth / Firebase / backend
       setUser({ provider:"google", name:"Użytkownik Google", email:"google@user.com" });
       showToast("Zalogowano przez Google ✅");
       openTab("account");
     });
-
     document.getElementById("loginApple").addEventListener("click", ()=>{
-      // TODO: tu podpinasz Sign in with Apple
       setUser({ provider:"apple", name:"Użytkownik Apple", email:"apple@user.com" });
       showToast("Zalogowano przez Apple ✅");
       openTab("account");
     });
-
     document.getElementById("loginEmailForm").addEventListener("submit", (e)=>{
       e.preventDefault();
       const fd = new FormData(e.target);
       const email = fd.get("email");
-      // TODO: tu normalne logowanie do backendu
       setUser({ provider:"email", name: email.split("@")[0], email });
       showToast("Zalogowano ✅");
       openTab("account");
       e.target.reset();
     });
-
     document.getElementById("logoutBtn").addEventListener("click", ()=>{
       store.set("user", null);
       renderAccount();
       showToast("Wylogowano");
     });
 
-    // personal data save
-    const personalName = document.getElementById("personalName");
-    const personalPhone = document.getElementById("personalPhone");
-    const personalEmail = document.getElementById("personalEmail");
-    document.getElementById("savePersonalBtn").addEventListener("click", ()=>{
-      const user = store.get("user", {}) || {};
-      user.name = personalName.value || user.name;
-      user.phone = personalPhone.value || user.phone;
-      user.email = personalEmail.value || user.email;
-      setUser(user);
-      showToast("Dane zapisane");
-      closeSubpages();
-    });
-
-    function preloadPersonal(){
-      const user = store.get("user", {}) || {};
-      personalName.value = user.name || "";
-      personalPhone.value = user.phone || "";
-      personalEmail.value = user.email || "";
-    }
-
-    // language select demo
-    document.querySelectorAll("[data-lang]").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        store.set("lang", btn.dataset.lang);
-        showToast("Zapisano język: " + (btn.dataset.lang==="pl"?"Polski":"English"));
-        closeSubpages();
-      });
-    });
-
-    // ---------- Subpages navigation ----------
+    // ---------- Subpages ----------
     const subpages = {
       personal: document.getElementById("page-personal"),
       language: document.getElementById("page-language"),
       about: document.getElementById("page-about"),
       help: document.getElementById("page-help")
     };
-
     function openSubpage(name){
       closeSubpages();
       subpages[name]?.classList.add("active");
-      if(name==="personal") preloadPersonal();
     }
     function closeSubpages(){
       Object.values(subpages).forEach(p=>p.classList.remove("active"));
     }
     document.querySelectorAll("[data-back]").forEach(b=>b.addEventListener("click", closeSubpages));
-
     document.querySelectorAll(".list-item[data-open]").forEach(item=>{
       item.addEventListener("click", ()=> openSubpage(item.dataset.open));
+    });
+
+    document.getElementById("savePersonalBtn").addEventListener("click", ()=>{
+      const user = store.get("user", {}) || {};
+      user.name = document.getElementById("personalName").value || user.name;
+      user.phone = document.getElementById("personalPhone").value || user.phone;
+      user.email = document.getElementById("personalEmail").value || user.email;
+      setUser(user);
+      showToast("Dane zapisane");
+      closeSubpages();
+    });
+    document.querySelectorAll("[data-lang]").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        store.set("lang", btn.dataset.lang);
+        showToast("Zapisano język");
+        closeSubpages();
+      });
     });
 
     // ---------- Init ----------
@@ -1117,8 +980,6 @@
     renderNews();
     renderReservations();
     renderAccount();
-
-    // Default tab = Points
     openTab("points");
   </script>
 </body>
