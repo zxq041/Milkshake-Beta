@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Milko</title>
+  <title>Milk</title>
 
   <meta name="theme-color" content="#FF6A00" />
   <link rel="manifest" href="manifest.webmanifest" />
@@ -44,7 +44,6 @@
       padding-bottom: calc(118px + var(--safe-bottom));
     }
 
-    /* Decorative blobs */
     .blob{
       position:fixed;z-index:-1;filter:blur(70px);opacity:.33;
       width:280px;height:280px;border-radius:50%;
@@ -55,7 +54,6 @@
     .blob.b1{top:-70px;left:-70px}
     .blob.b2{bottom:-110px;right:-90px;transform:rotate(25deg)}
 
-    /* Topbar */
     .topbar{
       position:sticky;top:0;z-index:20;
       padding: calc(10px + var(--safe-top)) 14px 10px;
@@ -76,9 +74,7 @@
       border:2px solid rgba(255,255,255,.9);
       overflow:hidden;
     }
-    .logo-wrap img{
-      width:100%;height:100%;object-fit:cover;border-radius:50%;
-    }
+    .logo-wrap img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
     .pill{
       background:var(--grad);
       color:#fff;font-weight:900;font-size:.85rem;
@@ -87,7 +83,6 @@
       box-shadow:0 6px 16px rgba(255,106,0,.35);
     }
 
-    /* Layout */
     .container{padding:14px;max-width:820px;margin:0 auto;}
     .stack{display:flex;flex-direction:column;gap:12px;}
     .card{
@@ -109,7 +104,6 @@
     .muted{opacity:.82;font-size:.95rem;line-height:1.55}
     .tiny{font-size:.82rem;opacity:.7}
 
-    /* Inputs */
     label{font-size:.9rem;font-weight:900;margin:8px 0 6px;display:block}
     input,select,textarea{
       width:100%;padding:12px 14px;border-radius:14px;
@@ -145,8 +139,8 @@
     }
     .btn-small{padding:8px 10px;font-size:.9rem;border-radius:12px}
     .btn-wide{width:100%;}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
 
-    /* Tabs */
     .tab{display:none;animation:fade .22s ease}
     .tab.active{display:block}
     @keyframes fade{
@@ -154,7 +148,6 @@
       to{opacity:1;transform:none}
     }
 
-    /* Points hero */
     .points-hero{
       background:var(--grad);color:#fff;border-radius:22px;padding:16px;
       display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
@@ -164,12 +157,9 @@
       content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;
       background:radial-gradient(circle, rgba(255,255,255,.45), transparent 60%);
       transform:rotate(18deg);
-      pointer-events:none; /* ✅ FIX: NIE blokuj klików */
+      pointer-events:none;
     }
-    #showCodeBtn{
-      position:relative;
-      z-index:2; /* ✅ FIX: nad ozdobą */
-    }
+    #showCodeBtn{position:relative;z-index:2;}
 
     .points-count{font-size:2.5rem;font-weight:900;letter-spacing:.6px;line-height:1;}
     .points-sub{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;}
@@ -181,7 +171,6 @@
     .progress{margin-top:10px;background:rgba(255,255,255,.24);height:10px;border-radius:999px;overflow:hidden;}
     .progress > div{height:100%;background:rgba(255,255,255,.96);width:0%;transition:width .35s ease;border-radius:999px;}
 
-    /* Quick actions */
     .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
     .quick{
       background:var(--glass-strong);border:1px solid rgba(0,0,0,.04);
@@ -199,7 +188,6 @@
     .quick b{font-size:.95rem;font-weight:900}
     .quick span{font-size:.8rem;opacity:.7}
 
-    /* Rewards */
     .reward{
       display:flex;gap:12px;align-items:center;justify-content:space-between;
       background:var(--glass-strong);border-radius:18px;padding:12px;
@@ -213,7 +201,6 @@
     .reward-title{font-weight:900}
     .reward + .reward{margin-top:10px}
 
-    /* News */
     .news{
       background:var(--glass-strong);border-radius:18px;padding:12px;border:1px solid rgba(0,0,0,.04);
       box-shadow:var(--shadow-soft);
@@ -221,7 +208,6 @@
     .news h4{font-size:1.05rem;margin-bottom:6px;font-weight:900}
     .news .date{font-size:.82rem;opacity:.65;margin-bottom:6px}
 
-    /* Reservations */
     .res-item{
       padding:10px;border-radius:14px;background:#fff;border:1px solid #eee;display:grid;gap:4px;
     }
@@ -229,7 +215,35 @@
     .res-actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
     .divider{height:1px;background:rgba(0,0,0,.06);margin:4px 0 0;}
 
-    /* Account UI */
+    /* Zamów i odbierz */
+    .menu-list{display:grid;gap:10px;}
+    .menu-item{
+      background:var(--glass-strong);
+      border:1px solid rgba(0,0,0,.05);
+      border-radius:16px;
+      padding:12px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      box-shadow:var(--shadow-soft);
+    }
+    .menu-left{display:flex;gap:10px;align-items:center;}
+    .menu-ico{
+      width:48px;height:48px;border-radius:14px;background:var(--grad);color:#fff;
+      display:grid;place-items:center;font-size:1.2rem;box-shadow:0 6px 14px rgba(255,106,0,.4);
+    }
+    .menu-title{font-weight:900}
+    .menu-desc{font-size:.85rem;opacity:.7}
+    .menu-price{font-weight:900}
+
+    .cart-line{
+      display:flex;align-items:center;justify-content:space-between;gap:8px;
+      background:#fff;border:1px solid #eee;border-radius:12px;padding:8px 10px;
+    }
+    .cart-actions{display:flex;gap:6px;align-items:center;}
+    .qty-btn{
+      width:28px;height:28px;border-radius:8px;border:none;cursor:pointer;font-weight:900;
+      background:rgba(0,0,0,.06);
+    }
+
     .account-hero{display:flex;gap:12px;align-items:center;}
     .avatar{
       width:56px;height:56px;border-radius:16px;background:var(--grad);display:grid;place-items:center;
@@ -254,7 +268,6 @@
     .li-title{font-weight:900}
     .li-sub{font-size:.85rem;opacity:.7}
 
-    /* Auth */
     .auth-wrap{display:grid;gap:10px;}
     .auth-btn{width:100%;justify-content:center;font-weight:900;}
     .auth-btn.google{background:#fff;border:2px solid #eee;}
@@ -263,7 +276,6 @@
     .auth-sep::before,.auth-sep::after{content:"";flex:1;height:1px;background:rgba(0,0,0,.08);}
     .auth-sep span{font-size:.85rem;opacity:.7;font-weight:800;}
 
-    /* Subpages */
     .subpage{
       position:fixed;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;
       animation:slideIn .25s ease;padding-bottom: calc(20px + var(--safe-bottom));
@@ -283,7 +295,6 @@
     }
     .sub-title{font-weight:900;font-size:1.05rem}
 
-    /* Empty */
     .empty{
       background:var(--glass-strong);padding:14px;border-radius:16px;border:1px dashed rgba(0,0,0,.07);
       display:flex;gap:12px;align-items:center;
@@ -293,7 +304,6 @@
       box-shadow:0 6px 14px rgba(255,106,0,.4);
     }
 
-    /* Bottom nav */
     .bottom-nav{
       position:fixed;left:0;right:0;bottom:10px;z-index:50;display:flex;justify-content:center;pointer-events:none;
     }
@@ -305,7 +315,7 @@
       border:1px solid rgba(255,255,255,.98);
       box-shadow:0 10px 28px rgba(0,0,0,.18);
       border-radius:999px;padding:6px;
-      display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+      display:grid;grid-template-columns:repeat(7,1fr);gap:6px;
     }
     .nav-btn{
       background:transparent;border:none;cursor:pointer;border-radius:999px;
@@ -319,7 +329,6 @@
     }
     .nav-btn .lbl{font-size:.73rem;line-height:1}
 
-    /* Toast */
     .toast{
       position:fixed;left:50%;bottom: calc(126px + var(--safe-bottom));
       transform:translateX(-50%) translateY(8px);
@@ -330,10 +339,8 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.danger{background:var(--danger)}
 
-    /* ---------- MODAL / BOTTOM SHEET (Kod) ---------- */
     .modal{position:fixed; inset:0; z-index:100; display:none;}
     .modal.show{display:block;}
-
     .modal-backdrop{
       position:absolute; inset:0;
       background:rgba(0,0,0,.35);
@@ -341,7 +348,6 @@
       animation:fadeBg .18s ease;
     }
     @keyframes fadeBg{from{opacity:0}to{opacity:1}}
-
     .modal-sheet{
       position:absolute; left:0; right:0; bottom:0;
       background: var(--glass-strong);
@@ -352,12 +358,10 @@
       animation:sheetUp .22s ease forwards;
     }
     @keyframes sheetUp{to{transform:translateY(0)}}
-
     .modal-handle{
       width:46px; height:5px; border-radius:999px;
       background:rgba(0,0,0,.12); margin:6px auto 10px;
     }
-
     .modal-header{
       display:flex; align-items:center; justify-content:space-between;
       margin-bottom:10px;
@@ -368,13 +372,11 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-
     .modal-close{
       width:40px; height:40px; border-radius:12px; border:none; cursor:pointer;
       background:#fff; display:grid; place-items:center;
       box-shadow: var(--shadow-soft);
     }
-
     .modal-code-box{
       background:#0f0f0f; color:#fff;
       border-radius:18px; padding:18px 14px;
@@ -405,9 +407,9 @@
   <div class="topbar">
     <div class="brand">
       <div class="logo-wrap">
-        <img src="https://i.imgur.com/UNPIPSC.png" alt="Milko logo">
+        <img src="https://i.imgur.com/UNPIPSC.png" alt="Milk logo">
       </div>
-      Milko
+      Milk
     </div>
     <div class="pill"><i class="fa-solid fa-star"></i> <span id="pointsPill">0 pkt</span></div>
   </div>
@@ -425,7 +427,6 @@
           </div>
         </div>
 
-        <!-- PRZYCISK jak przy QR -->
         <button class="btn btn-ghost btn-small" id="showCodeBtn">
           <i class="fa-solid fa-id-card"></i> Pokaż kod
         </button>
@@ -441,11 +442,25 @@
             <b>Nagrody</b>
             <span>Wymień punkty</span>
           </button>
+
+          <button class="quick" data-go="prepaid">
+            <i class="fa-solid fa-credit-card"></i>
+            <b>Karty Pre-Paid</b>
+            <span>Doładuj saldo</span>
+          </button>
+
+          <button class="quick" data-go="order">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <b>Zamów i odbierz</b>
+            <span>Płatność na miejscu</span>
+          </button>
+
           <button class="quick" data-go="res">
             <i class="fa-solid fa-calendar-check"></i>
             <b>Rezerwuj</b>
             <span>Stolik w 10s</span>
           </button>
+
           <button class="quick" data-go="news">
             <i class="fa-solid fa-bolt"></i>
             <b>Aktualności</b>
@@ -467,6 +482,78 @@
         <p class="muted">Kliknij „Wymień”, a pokażemy Ci kod do odbioru w lokalu.</p>
       </div>
       <div class="card" id="rewardsList"></div>
+    </section>
+
+    <!-- TAB: KARTY PRE-PAID -->
+    <section id="tab-prepaid" class="tab">
+      <div class="card">
+        <div class="title">Karty Pre-Paid</div>
+        <p class="muted">
+          Kup kartę przedpłaconą i korzystaj z niej w lokalu. Po zakupie pokaż kod obsłudze przy kasie.
+        </p>
+      </div>
+
+      <div class="card" id="prepaidList"></div>
+
+      <div class="card">
+        <div class="subtitle">Twoje karty</div>
+        <div id="myPrepaidList" class="muted"></div>
+      </div>
+    </section>
+
+    <!-- TAB: ZAMÓW I ODBIERZ -->
+    <section id="tab-order" class="tab">
+      <div class="card">
+        <div class="title">Zamów i odbierz</div>
+        <p class="muted">
+          Złóż zamówienie w aplikacji, odbierz w lokalu. <b>Płatność na miejscu</b> (gotówka/karta).
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="subtitle">Menu</div>
+        <div id="menuList" class="menu-list"></div>
+      </div>
+
+      <div class="card stack">
+        <div class="subtitle">Koszyk</div>
+        <div id="cartList" class="stack"></div>
+        <div class="divider"></div>
+        <div style="display:flex;justify-content:space-between;font-weight:900;font-size:1.05rem">
+          <span>Razem</span><span id="cartTotal">0 zł</span>
+        </div>
+
+        <div class="row" style="margin-top:6px">
+          <div>
+            <label>Godzina odbioru</label>
+            <input type="time" id="pickupTime" required>
+          </div>
+          <div>
+            <label>Lokal</label>
+            <select id="pickupLocation">
+              <option>Słupsk</option>
+              <option>Rowy</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label>Uwagi (opcjonalnie)</label>
+          <textarea id="orderNotes" placeholder="np. bez bitej śmietany, alergie, itp."></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-wide" id="submitOrderBtn">
+          Złóż zamówienie <i class="fa-solid fa-check"></i>
+        </button>
+        <div class="tiny" style="text-align:center">
+          Płatność na miejscu przy odbiorze.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="subtitle">Twoje zamówienia</div>
+        <div id="ordersList" class="muted"></div>
+      </div>
     </section>
 
     <!-- TAB: REZERWACJE -->
@@ -729,6 +816,12 @@
       <button class="nav-btn" data-tab="rewards">
         <i class="fa-solid fa-gift"></i><div class="lbl">Nagrody</div>
       </button>
+      <button class="nav-btn" data-tab="prepaid">
+        <i class="fa-solid fa-credit-card"></i><div class="lbl">Pre-Paid</div>
+      </button>
+      <button class="nav-btn" data-tab="order">
+        <i class="fa-solid fa-bag-shopping"></i><div class="lbl">Zamów</div>
+      </button>
       <button class="nav-btn" data-tab="res">
         <i class="fa-solid fa-calendar-check"></i><div class="lbl">Rezerwacje</div>
       </button>
@@ -756,7 +849,7 @@
       <div class="modal-header">
         <div>
           <div class="tiny">Twój kod lojalnościowy</div>
-          <div id="codeTitle" class="modal-title">Milko ID</div>
+          <div id="codeTitle" class="modal-title">Milk ID</div>
         </div>
         <button class="modal-close" data-close aria-label="Zamknij">
           <i class="fa-solid fa-xmark"></i>
@@ -783,15 +876,15 @@
   </div>
 
   <script>
-    // ---------- PWA: register SW ----------
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
     }
 
-    // ---------- Tab navigation ----------
     const tabs = {
       points: document.getElementById("tab-points"),
       rewards: document.getElementById("tab-rewards"),
+      prepaid: document.getElementById("tab-prepaid"),
+      order: document.getElementById("tab-order"),
       res: document.getElementById("tab-res"),
       news: document.getElementById("tab-news"),
       account: document.getElementById("tab-account"),
@@ -805,7 +898,6 @@
     navButtons.forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.tab)));
     document.querySelectorAll("[data-go]").forEach(b=> b.addEventListener("click", ()=> openTab(b.dataset.go)));
 
-    // ---------- Toast ----------
     const toast = document.getElementById("toast");
     const toastText = document.getElementById("toastText");
     function showToast(msg, danger=false){
@@ -815,7 +907,6 @@
       setTimeout(()=>toast.classList.remove("show"), 3200);
     }
 
-    // ---------- Storage helpers ----------
     const store = {
       get(key, fallback){
         try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
@@ -824,7 +915,6 @@
       set(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
     };
 
-    // ---------- Clear points history ONCE ----------
     (function clearHistoryOnce(){
       const didClear = store.get("didClearHistoryOnce", false);
       if(!didClear){
@@ -833,7 +923,6 @@
       }
     })();
 
-    // -------- 6-cyfrowy kod STAŁY (nie jednorazowy) + modal --------
     const loyaltyCodeEl = document.getElementById("loyaltyCode");
     const showCodeBtn   = document.getElementById("showCodeBtn");
     const copyCodeBtn   = document.getElementById("copyCodeBtn");
@@ -957,6 +1046,304 @@
       openTab("rewards");
     }
 
+    // ---------- Pre-Paid Cards ----------
+    const prepaidCards = [
+      { id:"pp_50",  title:"Karta 50 zł",  value:50,  bonus:0,  desc:"Idealna na szybkie wyjścia" },
+      { id:"pp_100", title:"Karta 100 zł", value:100, bonus:10, desc:"+10 zł bonusu" },
+      { id:"pp_200", title:"Karta 200 zł", value:200, bonus:30, desc:"+30 zł bonusu" },
+    ];
+    const prepaidListEl   = document.getElementById("prepaidList");
+    const myPrepaidListEl = document.getElementById("myPrepaidList");
+
+    function renderPrepaid(){
+      prepaidListEl.innerHTML = prepaidCards.map(c => `
+        <div class="reward">
+          <div class="reward-left">
+            <div class="reward-ico"><i class="fa-solid fa-credit-card"></i></div>
+            <div>
+              <div class="reward-title">${c.title}</div>
+              <div class="tiny">${c.desc}</div>
+              <div class="muted">
+                Wartość: <b>${c.value} zł</b>${c.bonus ? ` + bonus ${c.bonus} zł` : ""}
+              </div>
+            </div>
+          </div>
+          <div style="text-align:right;min-width:110px">
+            <div style="font-weight:900">${c.value} zł</div>
+            <button class="btn btn-primary btn-small" data-buy-prepaid="${c.id}">
+              Kup
+            </button>
+          </div>
+        </div>
+      `).join("");
+
+      prepaidListEl.querySelectorAll("[data-buy-prepaid]").forEach(btn=>{
+        btn.addEventListener("click", ()=> buyPrepaid(btn.dataset.buyPrepaid));
+      });
+
+      renderMyPrepaid();
+    }
+
+    function buyPrepaid(id){
+      const c = prepaidCards.find(x=>x.id===id);
+      if(!c) return;
+
+      const list = store.get("prepaidOwned", []);
+      const code = String(Math.floor(100000 + Math.random()*900000));
+
+      list.unshift({
+        id: crypto.randomUUID(),
+        title: c.title,
+        value: c.value,
+        bonus: c.bonus,
+        total: c.value + c.bonus,
+        code,
+        date: new Date().toLocaleString("pl-PL"),
+        used: false
+      });
+
+      store.set("prepaidOwned", list);
+      renderMyPrepaid();
+      showToast(`Kupiono ${c.title} ✅`);
+      openTab("prepaid");
+    }
+
+    function renderMyPrepaid(){
+      const list = store.get("prepaidOwned", []);
+
+      myPrepaidListEl.innerHTML = list.length
+        ? list.map(p => `
+            <div class="res-item">
+              <b>${p.title} • ${p.total} zł</b>
+              <div class="tiny">Kod: <b style="letter-spacing:2px">${p.code}</b></div>
+              <div class="tiny">Kupiono: ${p.date}</div>
+              <div class="divider"></div>
+              <div class="res-actions">
+                <button class="btn btn-ghost btn-small" data-copy-prepaid="${p.code}">
+                  Kopiuj kod
+                </button>
+                <button class="btn btn-ghost btn-small" data-del-prepaid="${p.id}">
+                  Usuń
+                </button>
+              </div>
+            </div>
+          `).join("")
+        : `<div class="empty">
+            <div class="icon"><i class="fa-solid fa-credit-card"></i></div>
+            <div>
+              <b>Nie masz jeszcze kart</b>
+              <div class="tiny">Kup kartę Pre-Paid, a pojawi się tutaj.</div>
+            </div>
+           </div>`;
+
+      myPrepaidListEl.querySelectorAll("[data-copy-prepaid]").forEach(btn=>{
+        btn.addEventListener("click", async ()=>{
+          try{
+            await navigator.clipboard.writeText(btn.dataset.copyPrepaid);
+            showToast("Kod skopiowany ✅");
+          }catch{
+            showToast("Nie udało się skopiować 🤏", true);
+          }
+        });
+      });
+
+      myPrepaidListEl.querySelectorAll("[data-del-prepaid]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.dataset.delPrepaid;
+          const newList = store.get("prepaidOwned", []).filter(x=>x.id!==id);
+          store.set("prepaidOwned", newList);
+          renderMyPrepaid();
+          showToast("Karta usunięta");
+        });
+      });
+    }
+
+    // ---------- Zamów i odbierz ----------
+    const menuItems = [
+      { id:"m1", title:"Milkshake klasyczny", price:18, icon:"fa-ice-cream", desc:"Dowolny smak" },
+      { id:"m2", title:"Milkshake premium", price:24, icon:"fa-glass-whiskey", desc:"Z dodatkami" },
+      { id:"m3", title:"Deser dnia", price:16, icon:"fa-cookie-bite", desc:"Z gabloty" },
+      { id:"m4", title:"Burger Milk", price:29, icon:"fa-burger", desc:"Wołowina / kurczak" },
+      { id:"m5", title:"Frytki", price:10, icon:"fa-potato", desc:"Klasyczne" },
+    ];
+
+    const menuListEl = document.getElementById("menuList");
+    const cartListEl = document.getElementById("cartList");
+    const cartTotalEl = document.getElementById("cartTotal");
+    const submitOrderBtn = document.getElementById("submitOrderBtn");
+    const ordersListEl = document.getElementById("ordersList");
+
+    function getCart(){ return store.get("orderCart", []); }
+    function setCart(c){ store.set("orderCart", c); }
+
+    function addToCart(id){
+      const item = menuItems.find(x=>x.id===id);
+      if(!item) return;
+      const cart = getCart();
+      const existing = cart.find(c=>c.id===id);
+      if(existing) existing.qty++;
+      else cart.push({ id, qty:1 });
+      setCart(cart);
+      renderCart();
+      showToast(`Dodano: ${item.title}`);
+    }
+
+    function changeQty(id, delta){
+      const cart = getCart();
+      const line = cart.find(c=>c.id===id);
+      if(!line) return;
+      line.qty += delta;
+      if(line.qty<=0){
+        const idx = cart.findIndex(c=>c.id===id);
+        cart.splice(idx,1);
+      }
+      setCart(cart);
+      renderCart();
+    }
+
+    function renderMenu(){
+      menuListEl.innerHTML = menuItems.map(m=>`
+        <div class="menu-item">
+          <div class="menu-left">
+            <div class="menu-ico"><i class="fa-solid ${m.icon}"></i></div>
+            <div>
+              <div class="menu-title">${m.title}</div>
+              <div class="menu-desc">${m.desc}</div>
+            </div>
+          </div>
+          <div style="text-align:right;min-width:88px">
+            <div class="menu-price">${m.price} zł</div>
+            <button class="btn btn-primary btn-small" data-add="${m.id}">Dodaj</button>
+          </div>
+        </div>
+      `).join("");
+
+      menuListEl.querySelectorAll("[data-add]").forEach(btn=>{
+        btn.addEventListener("click", ()=> addToCart(btn.dataset.add));
+      });
+    }
+
+    function renderCart(){
+      const cart = getCart();
+      if(!cart.length){
+        cartListEl.innerHTML = `
+          <div class="empty">
+            <div class="icon"><i class="fa-solid fa-bag-shopping"></i></div>
+            <div>
+              <b>Koszyk jest pusty</b>
+              <div class="tiny">Dodaj coś z menu.</div>
+            </div>
+          </div>`;
+        cartTotalEl.textContent = "0 zł";
+        submitOrderBtn.disabled = true;
+        return;
+      }
+
+      submitOrderBtn.disabled = false;
+
+      let total = 0;
+      cartListEl.innerHTML = cart.map(c=>{
+        const m = menuItems.find(x=>x.id===c.id);
+        const lineTotal = m.price * c.qty;
+        total += lineTotal;
+        return `
+          <div class="cart-line">
+            <div>
+              <b>${m.title}</b>
+              <div class="tiny">${m.price} zł x ${c.qty} = ${lineTotal} zł</div>
+            </div>
+            <div class="cart-actions">
+              <button class="qty-btn" data-qty="${c.id}" data-d="-1">−</button>
+              <b>${c.qty}</b>
+              <button class="qty-btn" data-qty="${c.id}" data-d="1">+</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      cartTotalEl.textContent = total + " zł";
+
+      cartListEl.querySelectorAll("[data-qty]").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = btn.dataset.qty;
+          const d = Number(btn.dataset.d);
+          changeQty(id, d);
+        });
+      });
+    }
+
+    function submitOrder(){
+      const cart = getCart();
+      if(!cart.length){ showToast("Koszyk pusty 😅", true); return; }
+
+      const pickupTime = document.getElementById("pickupTime").value;
+      const pickupLocation = document.getElementById("pickupLocation").value;
+      const notes = document.getElementById("orderNotes").value;
+
+      if(!pickupTime){
+        showToast("Ustaw godzinę odbioru ⏰", true);
+        return;
+      }
+
+      const items = cart.map(c=>{
+        const m = menuItems.find(x=>x.id===c.id);
+        return { title:m.title, qty:c.qty, price:m.price };
+      });
+
+      const total = items.reduce((s,i)=>s+i.price*i.qty,0);
+
+      const orders = store.get("orders", []);
+      orders.unshift({
+        id: crypto.randomUUID(),
+        items,
+        total,
+        pickupTime,
+        pickupLocation,
+        notes,
+        date: new Date().toLocaleString("pl-PL"),
+        status: "Przyjęte"
+      });
+      store.set("orders", orders);
+
+      setCart([]);
+      document.getElementById("orderNotes").value = "";
+      renderCart();
+      renderOrders();
+      showToast("Zamówienie złożone ✅");
+      openTab("order");
+    }
+
+    function renderOrders(){
+      const orders = store.get("orders", []);
+      ordersListEl.innerHTML = orders.length
+        ? orders.map(o=>`
+            <div class="res-item">
+              <b>${o.pickupLocation} • ${o.pickupTime}</b>
+              <div class="tiny">Złożono: ${o.date}</div>
+              <div class="tiny">Status: <b>${o.status}</b></div>
+              <div style="margin-top:6px">
+                ${o.items.map(i=>`• ${i.qty}x ${i.title}`).join("<br>")}
+              </div>
+              <div class="divider"></div>
+              <div style="display:flex;justify-content:space-between;font-weight:900">
+                <span>Razem</span><span>${o.total} zł</span>
+              </div>
+              <div class="tiny" style="margin-top:4px">
+                Płatność na miejscu przy odbiorze.
+              </div>
+            </div>
+          `).join("")
+        : `<div class="empty">
+            <div class="icon"><i class="fa-solid fa-bag-shopping"></i></div>
+            <div>
+              <b>Brak zamówień</b>
+              <div class="tiny">Twoje zamówienia pojawią się tutaj.</div>
+            </div>
+           </div>`;
+    }
+
+    submitOrderBtn.addEventListener("click", submitOrder);
+
     // ---------- News ----------
     const news = store.get("news", [
       { title:"Happy Hour 15–18!", date:"Dzisiaj", body:"Wpadnij na promo milkshake’y i desery. Szczegóły w lokalu." },
@@ -1049,7 +1436,7 @@
       loggedOutEl.style.display = isLogged ? "none" : "flex";
       loggedInEl.style.display  = isLogged ? "flex" : "none";
       if(isLogged){
-        const initials = (user.name || "Milko User").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+        const initials = (user.name || "Milk User").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
         avatarEl.textContent = initials;
         accNameEl.textContent = user.name || "Użytkownik";
         accEmailEl.textContent = user.email || "";
@@ -1120,6 +1507,10 @@
     // ---------- Init ----------
     renderPoints();
     renderRewards();
+    renderPrepaid();
+    renderMenu();
+    renderCart();
+    renderOrders();
     renderNews();
     renderReservations();
     renderAccount();
