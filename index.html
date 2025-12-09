@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Milk</title>
 
+  <!-- PWA -->
   <meta name="theme-color" content="#FF6A00" />
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="icon" href="favicon.png" />
+  <link rel="apple-touch-icon" href="favicon.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -44,7 +46,6 @@
       padding-bottom: calc(118px + var(--safe-bottom));
     }
 
-    /* Decorative blobs */
     .blob{
       position:fixed;z-index:-1;filter:blur(70px);opacity:.33;
       width:280px;height:280px;border-radius:50%;
@@ -55,7 +56,6 @@
     .blob.b1{top:-70px;left:-70px}
     .blob.b2{bottom:-110px;right:-90px;transform:rotate(25deg)}
 
-    /* Topbar */
     .topbar{
       position:sticky;top:0;z-index:20;
       padding: calc(10px + var(--safe-top)) 14px 10px;
@@ -76,9 +76,7 @@
       border:2px solid rgba(255,255,255,.9);
       overflow:hidden;
     }
-    .logo-wrap img{
-      width:100%;height:100%;object-fit:cover;border-radius:50%;
-    }
+    .logo-wrap img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
     .pill{
       background:var(--grad);
       color:#fff;font-weight:900;font-size:.85rem;
@@ -87,7 +85,6 @@
       box-shadow:0 6px 16px rgba(255,106,0,.35);
     }
 
-    /* Layout */
     .container{padding:14px;max-width:820px;margin:0 auto;}
     .stack{display:flex;flex-direction:column;gap:12px;}
     .card{
@@ -109,7 +106,6 @@
     .muted{opacity:.82;font-size:.95rem;line-height:1.55}
     .tiny{font-size:.82rem;opacity:.7}
 
-    /* Inputs */
     label{font-size:.9rem;font-weight:900;margin:8px 0 6px;display:block}
     input,select,textarea{
       width:100%;padding:12px 14px;border-radius:14px;
@@ -147,7 +143,6 @@
     .btn-wide{width:100%;}
     .btn:disabled{opacity:.6;cursor:not-allowed}
 
-    /* Tabs */
     .tab{display:none;animation:fade .22s ease}
     .tab.active{display:block}
     @keyframes fade{
@@ -155,7 +150,6 @@
       to{opacity:1;transform:none}
     }
 
-    /* Points hero */
     .points-hero{
       background:var(--grad);color:#fff;border-radius:22px;padding:16px;
       display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
@@ -168,6 +162,7 @@
       pointer-events:none;
     }
     #showCodeBtn{position:relative;z-index:2;}
+
     .points-count{font-size:2.5rem;font-weight:900;letter-spacing:.6px;line-height:1;}
     .points-sub{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;}
     .chip{
@@ -178,7 +173,6 @@
     .progress{margin-top:10px;background:rgba(255,255,255,.24);height:10px;border-radius:999px;overflow:hidden;}
     .progress > div{height:100%;background:rgba(255,255,255,.96);width:0%;transition:width .35s ease;border-radius:999px;}
 
-    /* Quick actions */
     .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
     .quick{
       background:var(--glass-strong);border:1px solid rgba(0,0,0,.04);
@@ -196,7 +190,6 @@
     .quick b{font-size:.95rem;font-weight:900}
     .quick span{font-size:.8rem;opacity:.7}
 
-    /* Rewards */
     .reward{
       display:flex;gap:12px;align-items:center;justify-content:space-between;
       background:var(--glass-strong);border-radius:18px;padding:12px;
@@ -210,7 +203,13 @@
     .reward-title{font-weight:900}
     .reward + .reward{margin-top:10px}
 
-    /* Reservations */
+    .news{
+      background:var(--glass-strong);border-radius:18px;padding:12px;border:1px solid rgba(0,0,0,.04);
+      box-shadow:var(--shadow-soft);
+    }
+    .news h4{font-size:1.05rem;margin-bottom:6px;font-weight:900}
+    .news .date{font-size:.82rem;opacity:.65;margin-bottom:6px}
+
     .res-item{
       padding:10px;border-radius:14px;background:#fff;border:1px solid #eee;display:grid;gap:4px;
     }
@@ -218,7 +217,7 @@
     .res-actions{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
     .divider{height:1px;background:rgba(0,0,0,.06);margin:4px 0 0;}
 
-    /* Order & pickup */
+    /* Zamów i odbierz */
     .menu-list{display:grid;gap:10px;}
     .menu-item{
       background:var(--glass-strong);
@@ -236,6 +235,7 @@
     .menu-title{font-weight:900}
     .menu-desc{font-size:.85rem;opacity:.7}
     .menu-price{font-weight:900}
+
     .cart-line{
       display:flex;align-items:center;justify-content:space-between;gap:8px;
       background:#fff;border:1px solid #eee;border-radius:12px;padding:8px 10px;
@@ -246,7 +246,6 @@
       background:rgba(0,0,0,.06);
     }
 
-    /* Account UI */
     .account-hero{display:flex;gap:12px;align-items:center;}
     .avatar{
       width:56px;height:56px;border-radius:16px;background:var(--grad);display:grid;place-items:center;
@@ -254,6 +253,7 @@
     }
     .account-name{font-weight:900;font-size:1.1rem}
     .account-mail{font-size:.9rem;opacity:.75}
+
     .list{display:flex;flex-direction:column;gap:8px;}
     .list-item{
       background:var(--glass-strong);border:1px solid rgba(0,0,0,.04);
@@ -270,7 +270,6 @@
     .li-title{font-weight:900}
     .li-sub{font-size:.85rem;opacity:.7}
 
-    /* Auth */
     .auth-wrap{display:grid;gap:10px;}
     .auth-btn{width:100%;justify-content:center;font-weight:900;}
     .auth-btn.google{background:#fff;border:2px solid #eee;}
@@ -279,7 +278,6 @@
     .auth-sep::before,.auth-sep::after{content:"";flex:1;height:1px;background:rgba(0,0,0,.08);}
     .auth-sep span{font-size:.85rem;opacity:.7;font-weight:800;}
 
-    /* Subpages */
     .subpage{
       position:fixed;inset:0;background:var(--bg);z-index:80;display:none;flex-direction:column;
       animation:slideIn .25s ease;padding-bottom: calc(20px + var(--safe-bottom));
@@ -299,7 +297,6 @@
     }
     .sub-title{font-weight:900;font-size:1.05rem}
 
-    /* Empty */
     .empty{
       background:var(--glass-strong);padding:14px;border-radius:16px;border:1px dashed rgba(0,0,0,.07);
       display:flex;gap:12px;align-items:center;
@@ -309,87 +306,31 @@
       box-shadow:0 6px 14px rgba(255,106,0,.4);
     }
 
-    /* Bottom nav — FIX 6 tabs on phones */
     .bottom-nav{
-      position:fixed;
-      left:0; right:0;
-      bottom:10px;
-      z-index:50;
-      display:flex;
-      justify-content:center;
-      pointer-events:none;
+      position:fixed;left:0;right:0;bottom:10px;z-index:50;display:flex;justify-content:center;pointer-events:none;
     }
-
     .nav-wrap{
       pointer-events:auto;
       width:min(820px,calc(100% - 18px));
-      background:rgba(255,255,255,.88);
+      background:rgba(255,255,255,.85);
       backdrop-filter:blur(16px);
       border:1px solid rgba(255,255,255,.98);
       box-shadow:0 10px 28px rgba(0,0,0,.18);
-      border-radius:999px;
-      padding:6px 6px;
-
-      display:flex;
-      gap:6px;
-      align-items:stretch;
+      border-radius:999px;padding:6px;
+      display:grid;grid-template-columns:repeat(7,1fr);gap:6px;
     }
-
     .nav-btn{
-      flex:1 1 0;
-      min-width:0;
-      background:transparent;
-      border:none;
-      cursor:pointer;
-      border-radius:999px;
-      padding:8px 4px;
-
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-
-      font-weight:900;
-      color:var(--text);
-      opacity:.7;
-      transition:.2s all;
-      -webkit-tap-highlight-color: transparent;
-
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      background:transparent;border:none;cursor:pointer;border-radius:999px;
+      padding:9px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;
+      font-weight:900;color:var(--text);opacity:.7;transition:.2s all;-webkit-tap-highlight-color: transparent;
     }
-
-    .nav-btn i{
-      font-size:clamp(.95rem, 2.8vw, 1.12rem);
-      line-height:1;
-    }
-
-    .nav-btn .lbl{
-      font-size:clamp(.62rem, 2.2vw, .73rem);
-      line-height:1.05;
-      text-align:center;
-    }
-
+    .nav-btn i{font-size:1.12rem}
     .nav-btn.active{
-      background:var(--grad);
-      color:#fff;
-      opacity:1;
-      transform:translateY(-2px);
+      background:var(--grad);color:#fff;opacity:1;transform:translateY(-2px);
       box-shadow:0 8px 18px rgba(255,106,0,.45);
     }
+    .nav-btn .lbl{font-size:.73rem;line-height:1}
 
-    @media (max-width:420px){
-      .nav-wrap{ gap:4px; padding:5px; }
-      .nav-btn{ padding:7px 2px; gap:3px; }
-    }
-    @media (max-width:360px){
-      .nav-btn i{ font-size:.9rem; }
-      .nav-btn .lbl{ font-size:.6rem; }
-    }
-
-    /* Toast */
     .toast{
       position:fixed;left:50%;bottom: calc(126px + var(--safe-bottom));
       transform:translateX(-50%) translateY(8px);
@@ -400,10 +341,8 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.danger{background:var(--danger)}
 
-    /* ---------- MODAL / BOTTOM SHEET (Kod) ---------- */
     .modal{position:fixed; inset:0; z-index:100; display:none;}
     .modal.show{display:block;}
-
     .modal-backdrop{
       position:absolute; inset:0;
       background:rgba(0,0,0,.35);
@@ -411,7 +350,6 @@
       animation:fadeBg .18s ease;
     }
     @keyframes fadeBg{from{opacity:0}to{opacity:1}}
-
     .modal-sheet{
       position:absolute; left:0; right:0; bottom:0;
       background: var(--glass-strong);
@@ -422,12 +360,10 @@
       animation:sheetUp .22s ease forwards;
     }
     @keyframes sheetUp{to{transform:translateY(0)}}
-
     .modal-handle{
       width:46px; height:5px; border-radius:999px;
       background:rgba(0,0,0,.12); margin:6px auto 10px;
     }
-
     .modal-header{
       display:flex; align-items:center; justify-content:space-between;
       margin-bottom:10px;
@@ -438,13 +374,11 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-
     .modal-close{
       width:40px; height:40px; border-radius:12px; border:none; cursor:pointer;
       background:#fff; display:grid; place-items:center;
       box-shadow: var(--shadow-soft);
     }
-
     .modal-code-box{
       background:#0f0f0f; color:#fff;
       border-radius:18px; padding:18px 14px;
@@ -463,6 +397,7 @@
     }
     @media (max-width:380px){
       .quick-grid{grid-template-columns:1fr 1fr}
+      .nav-wrap{gap:4px}
     }
   </style>
 </head>
@@ -526,6 +461,12 @@
             <i class="fa-solid fa-calendar-check"></i>
             <b>Rezerwuj</b>
             <span>Stolik w 10s</span>
+          </button>
+
+          <button class="quick" data-go="news">
+            <i class="fa-solid fa-bolt"></i>
+            <b>Aktualności</b>
+            <span>Nowości i promo</span>
           </button>
         </div>
       </div>
@@ -684,6 +625,15 @@
         <div class="subtitle">Twoje rezerwacje</div>
         <div id="reservationsList" class="muted"></div>
       </div>
+    </section>
+
+    <!-- TAB: AKTUALNOŚCI -->
+    <section id="tab-news" class="tab">
+      <div class="card">
+        <div class="title">Aktualności</div>
+        <p class="muted">Nowości, promocje i ogłoszenia z MilkShake Bar.</p>
+      </div>
+      <div class="card stack" id="newsList"></div>
     </section>
 
     <!-- TAB: KONTO -->
@@ -875,7 +825,10 @@
         <i class="fa-solid fa-bag-shopping"></i><div class="lbl">Zamów</div>
       </button>
       <button class="nav-btn" data-tab="res">
-        <i class="fa-solid fa-calendar-check"></i><div class="lbl">Rezerwuj</div>
+        <i class="fa-solid fa-calendar-check"></i><div class="lbl">Rezerwacje</div>
+      </button>
+      <button class="nav-btn" data-tab="news">
+        <i class="fa-solid fa-bolt"></i><div class="lbl">News</div>
       </button>
       <button class="nav-btn" data-tab="account">
         <i class="fa-solid fa-user"></i><div class="lbl">Konto</div>
@@ -925,18 +878,18 @@
   </div>
 
   <script>
-    // ---------- PWA ----------
+    // rejestracja SW do PWA
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
     }
 
-    // ---------- Tabs ----------
     const tabs = {
       points: document.getElementById("tab-points"),
       rewards: document.getElementById("tab-rewards"),
       prepaid: document.getElementById("tab-prepaid"),
       order: document.getElementById("tab-order"),
       res: document.getElementById("tab-res"),
+      news: document.getElementById("tab-news"),
       account: document.getElementById("tab-account"),
     };
     const navButtons = document.querySelectorAll(".nav-btn");
@@ -948,7 +901,6 @@
     navButtons.forEach(btn => btn.addEventListener("click", () => openTab(btn.dataset.tab)));
     document.querySelectorAll("[data-go]").forEach(b=> b.addEventListener("click", ()=> openTab(b.dataset.go)));
 
-    // ---------- Toast ----------
     const toast = document.getElementById("toast");
     const toastText = document.getElementById("toastText");
     function showToast(msg, danger=false){
@@ -958,7 +910,6 @@
       setTimeout(()=>toast.classList.remove("show"), 3200);
     }
 
-    // ---------- Storage ----------
     const store = {
       get(key, fallback){
         try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
@@ -967,7 +918,6 @@
       set(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
     };
 
-    // ---------- Clear points history once ----------
     (function clearHistoryOnce(){
       const didClear = store.get("didClearHistoryOnce", false);
       if(!didClear){
@@ -976,7 +926,6 @@
       }
     })();
 
-    // ---------- Loyalty code modal ----------
     const loyaltyCodeEl = document.getElementById("loyaltyCode");
     const showCodeBtn   = document.getElementById("showCodeBtn");
     const copyCodeBtn   = document.getElementById("copyCodeBtn");
@@ -1048,7 +997,7 @@
     // ---------- Rewards ----------
     const rewards = [
       { id:"shake_small", title:"Milkshake mały", cost:80, icon:"fa-ice-cream", desc:"Dowolny smak" },
-      { id:"shake_big", title:"Milkshake duży", cost:120, icon:"fa-glass-whiskey", desc:"Z dodatkami" },
+      { id:"shake_big", title:"Milkshake duży", cost:120, icon:"fa-glass-whiskey", desc:"Ekstra dodatki" },
       { id:"dessert", title:"Dowolny deser", cost:150, icon:"fa-cookie-bite", desc:"Z gabloty" },
       { id:"breakfast", title:"Śniadanie", cost:200, icon:"fa-egg", desc:"Na miejscu" },
     ];
@@ -1212,7 +1161,7 @@
       });
     }
 
-    // ---------- Order & pickup ----------
+    // ---------- Zamów i odbierz ----------
     const menuItems = [
       { id:"m1", title:"Milkshake klasyczny", price:18, icon:"fa-ice-cream", desc:"Dowolny smak" },
       { id:"m2", title:"Milkshake premium", price:24, icon:"fa-glass-whiskey", desc:"Z dodatkami" },
@@ -1398,6 +1347,27 @@
 
     submitOrderBtn.addEventListener("click", submitOrder);
 
+    // ---------- News ----------
+    const news = store.get("news", [
+      { title:"Happy Hour 15–18!", date:"Dzisiaj", body:"Wpadnij na promo milkshake’y i desery. Szczegóły w lokalu." },
+      { title:"Nowy smak: Mango-Lassi", date:"Ten tydzień", body:"Egzotyczna nowość już w menu w Słupsku i Rowach." },
+    ]);
+    const newsListEl = document.getElementById("newsList");
+    function renderNews(){
+      newsListEl.innerHTML = news.length ? news.map(n => `
+        <div class="news">
+          <div class="date">${n.date}</div>
+          <h4>${n.title}</h4>
+          <p class="muted">${n.body}</p>
+        </div>
+      `).join("") : `
+        <div class="empty">
+          <div class="icon"><i class="fa-solid fa-bolt"></i></div>
+          <div><b>Brak aktualności</b><div class="tiny">Sprawdź ponownie później.</div></div>
+        </div>
+      `;
+    }
+
     // ---------- Reservations ----------
     const resForm = document.getElementById("reservationForm");
     const resListEl = document.getElementById("reservationsList");
@@ -1544,6 +1514,7 @@
     renderMenu();
     renderCart();
     renderOrders();
+    renderNews();
     renderReservations();
     renderAccount();
     openTab("points");
