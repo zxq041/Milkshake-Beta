@@ -178,6 +178,47 @@
     .progress{margin-top:10px;background:rgba(255,255,255,.24);height:10px;border-radius:999px;overflow:hidden;}
     .progress > div{height:100%;background:rgba(255,255,255,.96);width:0%;transition:width .35s ease;border-radius:999px;}
 
+    /* Opening hours / status */
+    .opening-card{
+      background: var(--glass);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,.98);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+      padding: 12px 14px;
+      display: grid;
+      gap: 8px;
+      text-align: center;
+    }
+    .opening-status{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      font-weight:900;
+      font-size:1.02rem;
+    }
+    .status-dot{
+      width:10px;height:10px;border-radius:50%;
+      background:#ccc;
+      box-shadow: 0 0 0 3px rgba(0,0,0,.04);
+    }
+    .status-dot.open{ background: var(--success); }
+    .status-dot.closed{ background: var(--danger); }
+
+    .opening-hours{
+      font-size:.9rem;
+      line-height:1.55;
+      opacity:.9;
+      display:grid;
+      gap:2px;
+    }
+    .opening-hours b{ font-weight:900; }
+    .opening-hours .today{
+      font-weight:900;
+      color: var(--link);
+    }
+
     /* Quick actions */
     .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px;}
     .quick{
@@ -485,6 +526,16 @@
 
     <!-- TAB: PUNKTY -->
     <section id="tab-points" class="tab active">
+
+      <!-- Opening hours + status -->
+      <div class="opening-card" id="openingCard">
+        <div class="opening-status">
+          <span class="status-dot" id="openDot"></span>
+          <span id="openText">Sprawdzam status...</span>
+        </div>
+        <div class="opening-hours" id="openingHours"></div>
+      </div>
+
       <div class="points-hero">
         <div>
           <div class="tiny">Twoje punkty</div>
@@ -966,6 +1017,56 @@
       },
       set(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
     };
+
+    // ---------- Opening hours / status ----------
+    const openDotEl   = document.getElementById("openDot");
+    const openTextEl  = document.getElementById("openText");
+    const openHoursEl = document.getElementById("openingHours");
+
+    const openingSchedule = {
+      0: { label: "niedziela", open: "09:00", close: "21:00" },
+      1: { label: "poniedziałek", open: "08:00", close: "21:00" },
+      2: { label: "wtorek", open: "08:00", close: "21:00" },
+      3: { label: "środa", open: "08:00", close: "21:00" },
+      4: { label: "czwartek", open: "08:00", close: "21:00" },
+      5: { label: "piątek", open: "08:00", close: "22:00" },
+      6: { label: "sobota", open: "09:00", close: "22:00" },
+    };
+
+    function toMinutes(hhmm){
+      const [h,m] = hhmm.split(":").map(Number);
+      return h*60 + m;
+    }
+
+    function renderOpeningHours(){
+      const now = new Date();
+      const day = now.getDay(); // 0=niedz, 1=pon, ...
+      const minutesNow = now.getHours()*60 + now.getMinutes();
+
+      const today = openingSchedule[day];
+      const openM  = toMinutes(today.open);
+      const closeM = toMinutes(today.close);
+
+      const isOpen = minutesNow >= openM && minutesNow < closeM;
+
+      openDotEl.classList.remove("open","closed");
+      openDotEl.classList.add(isOpen ? "open" : "closed");
+      openTextEl.textContent = isOpen ? "Jesteśmy Otwarci" : "Jesteśmy Zamknięci";
+
+      const order = [3,4,5,6,0,1,2]; // start od środy jak w rozpisce
+      openHoursEl.innerHTML = order.map(d=>{
+        const s = openingSchedule[d];
+        const isToday = d === day;
+        return `
+          <div class="${isToday ? "today" : ""}">
+            <b>${s.label}</b> ${s.open}–${s.close}
+          </div>
+        `;
+      }).join("");
+    }
+
+    renderOpeningHours();
+    setInterval(renderOpeningHours, 60*1000);
 
     // ---------- Clear points history once ----------
     (function clearHistoryOnce(){
