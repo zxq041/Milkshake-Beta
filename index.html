@@ -109,7 +109,6 @@
     .muted{opacity:.82;font-size:.95rem;line-height:1.55}
     .tiny{font-size:.82rem;opacity:.7}
 
-    /* Inputs */
     label{font-size:.9rem;font-weight:900;margin:8px 0 6px;display:block}
     input,select,textarea{
       width:100%;padding:12px 14px;border-radius:14px;
@@ -147,7 +146,6 @@
     .btn-wide{width:100%;}
     .btn:disabled{opacity:.6;cursor:not-allowed}
 
-    /* Tabs */
     .tab{display:none;animation:fade .22s ease}
     .tab.active{display:block}
     @keyframes fade{
@@ -155,7 +153,6 @@
       to{opacity:1;transform:none}
     }
 
-    /* Points hero */
     .points-hero{
       background:var(--grad);color:#fff;border-radius:22px;padding:16px;
       display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
@@ -189,6 +186,9 @@
       display: grid;
       gap: 8px;
       text-align: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .opening-status{
       display:flex;
@@ -206,13 +206,22 @@
     .status-dot.open{ background: var(--success); }
     .status-dot.closed{ background: var(--danger); }
 
+    .opening-hint{
+      font-size:.82rem;
+      opacity:.75;
+      font-weight:800;
+    }
+
     .opening-hours{
       font-size:.9rem;
       line-height:1.55;
       opacity:.9;
-      display:grid;
+      display:none;
       gap:2px;
+      padding-top:6px;
+      border-top:1px dashed rgba(0,0,0,.08);
     }
+    .opening-card.expanded .opening-hours{ display:grid; }
     .opening-hours b{ font-weight:900; }
     .opening-hours .today{
       font-weight:900;
@@ -350,7 +359,7 @@
       box-shadow:0 6px 14px rgba(255,106,0,.4);
     }
 
-    /* Bottom nav — FIX 6 tabs on phones */
+    /* Bottom nav */
     .bottom-nav{
       position:fixed;
       left:0; right:0;
@@ -360,7 +369,6 @@
       justify-content:center;
       pointer-events:none;
     }
-
     .nav-wrap{
       pointer-events:auto;
       width:min(820px,calc(100% - 18px));
@@ -370,12 +378,10 @@
       box-shadow:0 10px 28px rgba(0,0,0,.18);
       border-radius:999px;
       padding:6px 6px;
-
       display:flex;
       gap:6px;
       align-items:stretch;
     }
-
     .nav-btn{
       flex:1 1 0;
       min-width:0;
@@ -384,35 +390,29 @@
       cursor:pointer;
       border-radius:999px;
       padding:8px 4px;
-
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap:4px;
-
       font-weight:900;
       color:var(--text);
       opacity:.7;
       transition:.2s all;
       -webkit-tap-highlight-color: transparent;
-
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
     }
-
     .nav-btn i{
       font-size:clamp(.95rem, 2.8vw, 1.12rem);
       line-height:1;
     }
-
     .nav-btn .lbl{
       font-size:clamp(.62rem, 2.2vw, .73rem);
       line-height:1.05;
       text-align:center;
     }
-
     .nav-btn.active{
       background:var(--grad);
       color:#fff;
@@ -420,7 +420,6 @@
       transform:translateY(-2px);
       box-shadow:0 8px 18px rgba(255,106,0,.45);
     }
-
     @media (max-width:420px){
       .nav-wrap{ gap:4px; padding:5px; }
       .nav-btn{ padding:7px 2px; gap:3px; }
@@ -441,10 +440,9 @@
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
     .toast.danger{background:var(--danger)}
 
-    /* ---------- MODAL / BOTTOM SHEET (Kod) ---------- */
+    /* Modal */
     .modal{position:fixed; inset:0; z-index:100; display:none;}
     .modal.show{display:block;}
-
     .modal-backdrop{
       position:absolute; inset:0;
       background:rgba(0,0,0,.35);
@@ -452,7 +450,6 @@
       animation:fadeBg .18s ease;
     }
     @keyframes fadeBg{from{opacity:0}to{opacity:1}}
-
     .modal-sheet{
       position:absolute; left:0; right:0; bottom:0;
       background: var(--glass-strong);
@@ -463,12 +460,10 @@
       animation:sheetUp .22s ease forwards;
     }
     @keyframes sheetUp{to{transform:translateY(0)}}
-
     .modal-handle{
       width:46px; height:5px; border-radius:999px;
       background:rgba(0,0,0,.12); margin:6px auto 10px;
     }
-
     .modal-header{
       display:flex; align-items:center; justify-content:space-between;
       margin-bottom:10px;
@@ -479,13 +474,11 @@
       -webkit-background-clip:text;
       -webkit-text-fill-color:transparent;
     }
-
     .modal-close{
       width:40px; height:40px; border-radius:12px; border:none; cursor:pointer;
       background:#fff; display:grid; place-items:center;
       box-shadow: var(--shadow-soft);
     }
-
     .modal-code-box{
       background:#0f0f0f; color:#fff;
       border-radius:18px; padding:18px 14px;
@@ -527,12 +520,13 @@
     <!-- TAB: PUNKTY -->
     <section id="tab-points" class="tab active">
 
-      <!-- Opening hours + status -->
-      <div class="opening-card" id="openingCard">
+      <!-- Opening hours + status (klikane) -->
+      <div class="opening-card" id="openingCard" title="Kliknij, aby zobaczyć godziny otwarcia">
         <div class="opening-status">
           <span class="status-dot" id="openDot"></span>
           <span id="openText">Sprawdzam status...</span>
         </div>
+        <div class="opening-hint" id="openHint">Kliknij, aby zobaczyć godziny otwarcia</div>
         <div class="opening-hours" id="openingHours"></div>
       </div>
 
@@ -1019,9 +1013,11 @@
     };
 
     // ---------- Opening hours / status ----------
+    const openingCardEl = document.getElementById("openingCard");
     const openDotEl   = document.getElementById("openDot");
     const openTextEl  = document.getElementById("openText");
     const openHoursEl = document.getElementById("openingHours");
+    const openHintEl  = document.getElementById("openHint");
 
     const openingSchedule = {
       0: { label: "niedziela", open: "09:00", close: "21:00" },
@@ -1053,7 +1049,8 @@
       openDotEl.classList.add(isOpen ? "open" : "closed");
       openTextEl.textContent = isOpen ? "Jesteśmy Otwarci" : "Jesteśmy Zamknięci";
 
-      const order = [3,4,5,6,0,1,2]; // start od środy jak w rozpisce
+      // dni od poniedziałku do niedzieli
+      const order = [1,2,3,4,5,6,0];
       openHoursEl.innerHTML = order.map(d=>{
         const s = openingSchedule[d];
         const isToday = d === day;
@@ -1064,6 +1061,15 @@
         `;
       }).join("");
     }
+
+    // toggle godzin po kliknięciu w status
+    openingCardEl.addEventListener("click", ()=>{
+      openingCardEl.classList.toggle("expanded");
+      const expanded = openingCardEl.classList.contains("expanded");
+      openHintEl.textContent = expanded
+        ? "Kliknij, aby ukryć godziny otwarcia"
+        : "Kliknij, aby zobaczyć godziny otwarcia";
+    });
 
     renderOpeningHours();
     setInterval(renderOpeningHours, 60*1000);
