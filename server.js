@@ -1,6 +1,6 @@
 // server.js
-// Prosty backend dla aplikacji MILK + panel admina pod /33201adm
-// Dane trzymane w pliku JSON (db-milk.json) w tym samym folderze.
+// Backend dla aplikacji MILK + panel admina pod /33201adm
+// Dane są trzymane w pliku db-milk.json w tym samym folderze.
 
 const express = require("express");
 const path = require("path");
@@ -11,19 +11,26 @@ const { randomUUID } = require("crypto");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const __dirnameResolved = __dirname; // dla przejrzystości
+// ---------- ŚCIEŻKI ----------
+const ROOT = __dirname;
+const DB_FILE = path.join(ROOT, "db-milk.json");
 
-// ---------------------- DB (plik JSON) ----------------------
-const DB_FILE = path.join(__dirnameResolved, "db-milk.json");
-
-// Domyślna struktura bazy
+// ---------- Prosta "baza danych" ----------
 let db = {
-  users: [],      // {id, name, email, phone, points}
-  rewards: [],    // {id, title, cost, desc, icon, createdAt}
-  orders: [],     // {id, items, total, pickupTime, pickupLocation, notes, status, userId, createdAt}
-  prepaid: [],    // {id, code, title, value, bonus, total, balance, userId, createdAt, history:[]}
-  pointsOps: []   // {id, userId, amount, points, op, note, createdAt}
+  users: [],      // { id, name, email, phone, points }
+  rewards: [],    // { id, title, cost, desc, icon, createdAt }
+  orders: [],     // { id, items, total, pickupTime, pickupLocation, notes, status, userId, createdAt, updatedAt }
+  prepaid: [],    // { id, code, title, value, bonus, total, balance, userId, createdAt, history: [] }
+  pointsOps: []   // { id, userId, amount, points, op, note, createdAt }
 };
+
+function genId() {
+  try {
+    return randomUUID();
+  } catch {
+    return "id-" + Math.random().toString(36).slice(2, 10);
+  }
+}
 
 async function loadDb() {
   try {
@@ -35,57 +42,50 @@ async function loadDb() {
     const parsed = JSON.parse(raw);
     db = { ...db, ...parsed };
     console.log("[DB] Załadowano db-milk.json");
-  } catch (e) {
-    console.error("[DB] Błąd odczytu, startuję z pustą bazą:", e.message);
+  } catch (err) {
+    console.error("[DB] Błąd odczytu, start z pustą bazą:", err.message);
   }
 }
 
 async function saveDb() {
   try {
     await fsPromises.writeFile(DB_FILE, JSON.stringify(db, null, 2), "utf8");
-  } catch (e) {
-    console.error("[DB] Błąd zapisu:", e.message);
+  } catch (err) {
+    console.error("[DB] Błąd zapisu:", err.message);
   }
 }
 
-function genId() {
-  try {
-    return randomUUID();
-  } catch {
-    return "id-" + Math.random().toString(36).slice(2, 10);
-  }
-}
-
-// Na start wczytaj bazę
+// wczytanie na starcie
 loadDb();
 
-// ---------------------- Middleware ----------------------
+// ---------- Middleware ----------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serwuj wszystkie pliki z tego samego folderu (index.html, admin-milk.html itd.)
-app.use(express.static(__dirnameResolved));
+// ---------- ROUTES FRONT (HTML) ----------
 
-// ---------------------- ROUTES FRONT ----------------------
-
-// Strona główna aplikacji (PWA)
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirnameResolved, "index.html"));
-});
-
-// Panel admina dostępny tylko pod /33201adm
+// Panel admina pod /33201adm
+// ZMIEŃ "admin-milk.html" jeśli plik nazywa się inaczej (np. admin.html)
 app.get("/33201adm", (req, res) => {
-  res.sendFile(path.join(__dirnameResolved, "admin-milk.html"));
+  res.sendFile(path.join(ROOT, "admin-milk.html"));
 });
 
-// ---------------------- API MILK ----------------------
-// Zgodnie z API_CONFIG z admin-milk.html
+// statyczne pliki (index.html, css, js, ikony itp.)
+app.use(express.static(ROOT));
+
+// Home – aplikacja użytkownika (Milk PWA)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(ROOT, "index.html"));
+});
+
+// ---------- API MILK ----------
+// Możesz z nich korzystać w panelu admina
 
 // ===== STATS =====
 app.get("/api/milk/stats", (req, res) => {
   try {
     const usersCount = db.users.length;
-    const pointsTotal = db.users.reduce((s, u) => s + (u.points || 0), 0);
+    const pointsTotal = db.users.reduce((sum, u) => sum + (u.points || 0), 0);
     const redeems = db.pointsOps.filter((o) => o.op === "sub").length;
     const activeOrders = db.orders.filter(
       (o) => String(o.status || "").toLowerCase() !== "wydane"
@@ -99,25 +99,26 @@ app.get("/api/milk/stats", (req, res) => {
       ordersActive: activeOrders,
       prepaid: prepaidCount
     });
-  } catch (e) {
+  } catch (err) {
+    console.error("stats error", err);
     res.status(500).json({ message: "Błąd liczenia statystyk" });
   }
 });
 
 // ===== USERS =====
 
-// Lista wszystkich użytkowników
+// lista użytkowników
 app.get("/api/milk/users", (req, res) => {
   res.json(db.users);
 });
 
-// Szczegóły użytkownika
+// szczegóły użytkownika
 app.get("/api/milk/users/:id", (req, res) => {
   const user = db.users.find((u) => u.id === req.params.id);
-  if (!user) {
-    return res.status(404).json({ message: "Użytkownik nie istnieje" });
-  }
-  res.json(user);
+  if (!user) return res.status(404).json({ message: "Użytkownik nie istnieje" });
+
+  const history = db.pointsOps.filter((op) => op.userId === user.id);
+  res.json({ user, history });
 });
 
 // ===== POINTS =====
@@ -127,9 +128,7 @@ app.get("/api/milk/users/:id", (req, res) => {
 app.post("/api/milk/points/add", async (req, res) => {
   try {
     const { userId, amount, points, op, note } = req.body || {};
-    if (!userId) {
-      return res.status(400).json({ message: "Brak userId" });
-    }
+    if (!userId) return res.status(400).json({ message: "Brak userId" });
 
     let pts = parseInt(points, 10);
     const amt = parseFloat(amount || 0);
@@ -149,7 +148,7 @@ app.post("/api/milk/points/add", async (req, res) => {
 
     let user = db.users.find((u) => u.id === userId);
     if (!user) {
-      // jeśli nie istnieje – utwórz pustego z tym ID
+      // jeśli nie istnieje – tworzymy pusty z tym ID
       user = {
         id: userId,
         name: null,
@@ -165,43 +164,44 @@ app.post("/api/milk/points/add", async (req, res) => {
     const opObj = {
       id: genId(),
       userId,
-      amount: amt || 0,
+      amount: isNaN(amt) ? 0 : amt,
       points: pts,
       op: operation,
       note: note || "",
       createdAt: new Date().toISOString()
     };
-    db.pointsOps.unshift(opObj); // ostatnie na górze
+    db.pointsOps.unshift(opObj);
 
     await saveDb();
     res.json({ ok: true, user, op: opObj });
-  } catch (e) {
-    console.error("points/add error", e);
+  } catch (err) {
+    console.error("points/add error", err);
     res.status(500).json({ message: "Błąd zapisu punktów" });
   }
 });
 
-// Historia operacji punktów
+// historia operacji punktów
 app.get("/api/milk/points/ops", (req, res) => {
   res.json(db.pointsOps);
 });
 
 // ===== REWARDS =====
 
-// Lista nagród
+// lista nagród
 app.get("/api/milk/rewards", (req, res) => {
   res.json(db.rewards);
 });
 
-// Dodaj nagrodę
+// dodaj nagrodę
 app.post("/api/milk/rewards", async (req, res) => {
   try {
     const { title, cost, desc, icon } = req.body || {};
     if (!title || !cost) {
       return res
         .status(400)
-        .json({ message: "Wymagane jest title i cost" });
+        .json({ message: "Wymagane jest 'title' i 'cost'" });
     }
+
     const reward = {
       id: genId(),
       title: String(title),
@@ -213,20 +213,18 @@ app.post("/api/milk/rewards", async (req, res) => {
     db.rewards.push(reward);
     await saveDb();
     res.status(201).json(reward);
-  } catch (e) {
-    console.error("rewards POST error", e);
+  } catch (err) {
+    console.error("rewards POST error", err);
     res.status(500).json({ message: "Błąd dodawania nagrody" });
   }
 });
 
-// Edycja nagrody
+// edycja nagrody (opcjonalnie)
 app.put("/api/milk/rewards/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const reward = db.rewards.find((r) => r.id === id);
-    if (!reward) {
-      return res.status(404).json({ message: "Nagroda nie istnieje" });
-    }
+    if (!reward) return res.status(404).json({ message: "Nagroda nie istnieje" });
 
     const { title, cost, desc, icon } = req.body || {};
     if (title !== undefined) reward.title = String(title);
@@ -236,13 +234,13 @@ app.put("/api/milk/rewards/:id", async (req, res) => {
 
     await saveDb();
     res.json(reward);
-  } catch (e) {
-    console.error("rewards PUT error", e);
+  } catch (err) {
+    console.error("rewards PUT error", err);
     res.status(500).json({ message: "Błąd edycji nagrody" });
   }
 });
 
-// Usunięcie nagrody
+// usuń nagrodę
 app.delete("/api/milk/rewards/:id", async (req, res) => {
   try {
     const id = req.params.id;
@@ -253,15 +251,15 @@ app.delete("/api/milk/rewards/:id", async (req, res) => {
     db.rewards.splice(idx, 1);
     await saveDb();
     res.json({ ok: true });
-  } catch (e) {
-    console.error("rewards DELETE error", e);
+  } catch (err) {
+    console.error("rewards DELETE error", err);
     res.status(500).json({ message: "Błąd usuwania nagrody" });
   }
 });
 
-// ===== ORDERS =====
+// ===== ORDERS (Zamów i odbierz) =====
 
-// (opcjonalnie) POST – żeby aplikacja mogła wysłać zamówienie do backendu
+// (opcjonalnie) endpoint, jeśli chcesz wysyłać zamówienia z frontu do backendu
 // body: { items:[{title, qty, price}], total, pickupTime, pickupLocation, notes, userId }
 app.post("/api/milk/orders", async (req, res) => {
   try {
@@ -277,6 +275,7 @@ app.post("/api/milk/orders", async (req, res) => {
     if (!items.length) {
       return res.status(400).json({ message: "Brak pozycji w zamówieniu" });
     }
+
     const order = {
       id: genId(),
       items,
@@ -286,56 +285,54 @@ app.post("/api/milk/orders", async (req, res) => {
       notes: notes || "",
       status: "Przyjęte",
       userId: userId || null,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      updatedAt: null
     };
+
     db.orders.unshift(order);
     await saveDb();
     res.status(201).json(order);
-  } catch (e) {
-    console.error("orders POST error", e);
+  } catch (err) {
+    console.error("orders POST error", err);
     res.status(500).json({ message: "Błąd tworzenia zamówienia" });
   }
 });
 
-// GET lista zamówień
+// lista zamówień (dla panelu)
 app.get("/api/milk/orders", (req, res) => {
   res.json(db.orders);
 });
 
-// Zmiana statusu zamówienia
+// zmiana statusu zamówienia
 app.put("/api/milk/orders/:id", async (req, res) => {
   try {
     const id = req.params.id;
     const { status } = req.body || {};
     const order = db.orders.find((o) => o.id === id);
-    if (!order) {
-      return res.status(404).json({ message: "Zamówienie nie istnieje" });
-    }
-    if (status) {
-      order.status = String(status);
-    }
+    if (!order) return res.status(404).json({ message: "Zamówienie nie istnieje" });
+
+    if (status) order.status = String(status);
     order.updatedAt = new Date().toISOString();
     await saveDb();
     res.json(order);
-  } catch (e) {
-    console.error("orders PUT error", e);
+  } catch (err) {
+    console.error("orders PUT error", err);
     res.status(500).json({ message: "Błąd zmiany statusu zamówienia" });
   }
 });
 
 // ===== PREPAID =====
 
-// (opcjonalnie) zakup nowej karty z aplikacji
-// body: { title, value, bonus, userId }
+// zakup nowej karty (np. jeśli kiedyś podłączysz to z aplikacją)
 app.post("/api/milk/prepaid/purchase", async (req, res) => {
   try {
     const { title, value, bonus = 0, userId } = req.body || {};
     const val = Number(value || 0);
     const bon = Number(bonus || 0);
-    if (!val) {
-      return res.status(400).json({ message: "Wartość karty musi być > 0" });
-    }
+    if (!val) return res.status(400).json({ message: "Wartość karty musi być > 0" });
+
     const code = String(Math.floor(100000 + Math.random() * 900000));
+
     const card = {
       id: genId(),
       code,
@@ -354,52 +351,47 @@ app.post("/api/milk/prepaid/purchase", async (req, res) => {
         }
       ]
     };
+
     db.prepaid.unshift(card);
     await saveDb();
     res.status(201).json(card);
-  } catch (e) {
-    console.error("prepaid purchase error", e);
+  } catch (err) {
+    console.error("prepaid purchase error", err);
     res.status(500).json({ message: "Błąd zakupu karty" });
   }
 });
 
-// Lista wszystkich kart (dla panelu)
+// lista wszystkich kart (dla panelu)
 app.get("/api/milk/prepaid", (req, res) => {
   res.json(db.prepaid);
 });
 
-// Pobierz kartę po kodzie
+// pobranie karty po kodzie
 app.get("/api/milk/prepaid/:code", (req, res) => {
   const code = String(req.params.code);
   const card = db.prepaid.find((p) => String(p.code) === code);
-  if (!card) {
-    return res.status(404).json({ message: "Karta nie istnieje" });
-  }
+  if (!card) return res.status(404).json({ message: "Karta nie istnieje" });
   res.json(card);
 });
 
-// Doładowanie / odjęcie z karty
+// doładowanie / odjęcie z karty
 // body: { delta, note }
 app.post("/api/milk/prepaid/:code/adjust", async (req, res) => {
   try {
     const code = String(req.params.code);
     const { delta, note } = req.body || {};
     const d = Number(delta || 0);
-    if (!d) {
-      return res.status(400).json({ message: "delta musi być różne od 0" });
-    }
+    if (!d) return res.status(400).json({ message: "delta musi być różne od 0" });
+
     const card = db.prepaid.find((p) => String(p.code) === code);
-    if (!card) {
-      return res.status(404).json({ message: "Karta nie istnieje" });
-    }
+    if (!card) return res.status(404).json({ message: "Karta nie istnieje" });
 
     const prev = card.balance ?? card.total ?? card.value ?? 0;
     const next = prev + d;
     if (next < 0) {
-      return res
-        .status(400)
-        .json({ message: "Saldo nie może być ujemne" });
+      return res.status(400).json({ message: "Saldo nie może być ujemne" });
     }
+
     card.balance = next;
     if (!Array.isArray(card.history)) card.history = [];
     card.history.unshift({
@@ -410,20 +402,22 @@ app.post("/api/milk/prepaid/:code/adjust", async (req, res) => {
 
     await saveDb();
     res.json(card);
-  } catch (e) {
-    console.error("prepaid adjust error", e);
+  } catch (err) {
+    console.error("prepaid adjust error", err);
     res.status(500).json({ message: "Błąd zmiany salda karty" });
   }
 });
 
-// ---------------------- Fallback 404 for API ----------------------
+// ---------- Fallback 404 dla /api ----------
+
 app.use("/api", (req, res) => {
   res.status(404).json({ message: "Nieznany endpoint API" });
 });
 
-// ---------------------- Start serwera ----------------------
+// ---------- START SERWERA ----------
+
 app.listen(PORT, () => {
-  console.log(`Milk server działa na http://localhost:${PORT}`);
-  console.log(`Aplikacja:       http://localhost:${PORT}/`);
-  console.log(`Panel admina:    http://localhost:${PORT}/33201adm`);
+  console.log(`\nMilk server działa 🚀`);
+  console.log(`Aplikacja:    http://localhost:${PORT}/`);
+  console.log(`Admin panel:  http://localhost:${PORT}/33201adm\n`);
 });
