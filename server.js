@@ -1,6 +1,7 @@
 // server.js
-// Backend dla aplikacji MILK + panel admina pod /33201adm
-// Dane są trzymane w pliku db-milk.json w tym samym folderze.
+// Backend dla aplikacji MILK + panel admina pod /admin1
+// Wszystkie pliki (index.html, admin-milk.html, manifest, sw.js itd.)
+// leżą w tym samym folderze co server.js.
 
 const express = require("express");
 const path = require("path");
@@ -64,13 +65,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // ---------- ROUTES FRONT (HTML) ----------
 
-// Panel admina pod /33201adm
-// ZMIEŃ "admin-milk.html" jeśli plik nazywa się inaczej (np. admin.html)
-app.get("/33201adm", (req, res) => {
+// Panel admina pod /admin1
+// ZMIEŃ "admin-milk.html" jeśli plik nazywa się inaczej (np. "admin.html")
+app.get("/admin1", (req, res) => {
   res.sendFile(path.join(ROOT, "admin-milk.html"));
 });
 
-// statyczne pliki (index.html, css, js, ikony itp.)
+// statyczne pliki (index.html, manifest, sw.js, ikony, itp.)
 app.use(express.static(ROOT));
 
 // Home – aplikacja użytkownika (Milk PWA)
@@ -79,7 +80,6 @@ app.get("/", (req, res) => {
 });
 
 // ---------- API MILK ----------
-// Możesz z nich korzystać w panelu admina
 
 // ===== STATS =====
 app.get("/api/milk/stats", (req, res) => {
@@ -112,7 +112,7 @@ app.get("/api/milk/users", (req, res) => {
   res.json(db.users);
 });
 
-// szczegóły użytkownika
+// szczegóły użytkownika + historia punktów
 app.get("/api/milk/users/:id", (req, res) => {
   const user = db.users.find((u) => u.id === req.params.id);
   if (!user) return res.status(404).json({ message: "Użytkownik nie istnieje" });
@@ -125,6 +125,7 @@ app.get("/api/milk/users/:id", (req, res) => {
 
 // POST /api/milk/points/add
 // body: { userId, amount, points, op, note }
+// 10 zł = 1 pkt (jeśli points nie podane)
 app.post("/api/milk/points/add", async (req, res) => {
   try {
     const { userId, amount, points, op, note } = req.body || {};
@@ -134,8 +135,7 @@ app.post("/api/milk/points/add", async (req, res) => {
     const amt = parseFloat(amount || 0);
 
     if (!pts || pts <= 0) {
-      // 10 zł = 1 pkt
-      pts = Math.floor(amt / 10);
+      pts = Math.floor(amt / 10); // 10 zł = 1 pkt
     }
     if (!pts || pts <= 0) {
       return res
@@ -148,7 +148,6 @@ app.post("/api/milk/points/add", async (req, res) => {
 
     let user = db.users.find((u) => u.id === userId);
     if (!user) {
-      // jeśli nie istnieje – tworzymy pusty z tym ID
       user = {
         id: userId,
         name: null,
@@ -180,7 +179,7 @@ app.post("/api/milk/points/add", async (req, res) => {
   }
 });
 
-// historia operacji punktów
+// historia punktów
 app.get("/api/milk/points/ops", (req, res) => {
   res.json(db.pointsOps);
 });
@@ -259,8 +258,7 @@ app.delete("/api/milk/rewards/:id", async (req, res) => {
 
 // ===== ORDERS (Zamów i odbierz) =====
 
-// (opcjonalnie) endpoint, jeśli chcesz wysyłać zamówienia z frontu do backendu
-// body: { items:[{title, qty, price}], total, pickupTime, pickupLocation, notes, userId }
+// tworzenie zamówienia (jeśli chcesz wysyłać z frontu do backendu)
 app.post("/api/milk/orders", async (req, res) => {
   try {
     const {
@@ -323,7 +321,8 @@ app.put("/api/milk/orders/:id", async (req, res) => {
 
 // ===== PREPAID =====
 
-// zakup nowej karty (np. jeśli kiedyś podłączysz to z aplikacją)
+// zakup nowej karty
+// body: { title, value, bonus, userId }
 app.post("/api/milk/prepaid/purchase", async (req, res) => {
   try {
     const { title, value, bonus = 0, userId } = req.body || {};
@@ -361,7 +360,7 @@ app.post("/api/milk/prepaid/purchase", async (req, res) => {
   }
 });
 
-// lista wszystkich kart (dla panelu)
+// lista wszystkich kart
 app.get("/api/milk/prepaid", (req, res) => {
   res.json(db.prepaid);
 });
@@ -409,15 +408,13 @@ app.post("/api/milk/prepaid/:code/adjust", async (req, res) => {
 });
 
 // ---------- Fallback 404 dla /api ----------
-
 app.use("/api", (req, res) => {
   res.status(404).json({ message: "Nieznany endpoint API" });
 });
 
 // ---------- START SERWERA ----------
-
 app.listen(PORT, () => {
   console.log(`\nMilk server działa 🚀`);
   console.log(`Aplikacja:    http://localhost:${PORT}/`);
-  console.log(`Admin panel:  http://localhost:${PORT}/33201adm\n`);
+  console.log(`Admin panel:  http://localhost:${PORT}/admin1\n`);
 });
