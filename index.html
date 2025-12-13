@@ -324,7 +324,6 @@
     .auth-wrap{display:grid;gap:10px;}
     .auth-btn{width:100%;justify-content:center;font-weight:900;}
     .auth-btn.google{background:#fff;border:2px solid #eee;}
-    .auth-btn.apple{background:#111;color:#fff;}
     .auth-sep{display:flex;align-items:center;gap:10px;margin:6px 0;}
     .auth-sep::before,.auth-sep::after{content:"";flex:1;height:1px;background:rgba(0,0,0,.08);}
     .auth-sep span{font-size:.85rem;opacity:.7;font-weight:800;}
@@ -555,12 +554,6 @@
             <span>Wymień punkty</span>
           </button>
 
-          <button class="quick" data-go="prepaid">
-            <i class="fa-solid fa-credit-card"></i>
-            <b>Karty Pre-Paid</b>
-            <span>Doładuj saldo</span>
-          </button>
-
           <button class="quick" data-go="order">
             <i class="fa-solid fa-bag-shopping"></i>
             <b>Zamów i odbierz</b>
@@ -588,23 +581,6 @@
         <p class="muted">Kliknij „Wymień”, a pokażemy Ci kod do odbioru w lokalu.</p>
       </div>
       <div class="card" id="rewardsList"></div>
-    </section>
-
-    <!-- TAB: KARTY PRE-PAID -->
-    <section id="tab-prepaid" class="tab">
-      <div class="card">
-        <div class="title">Karty Pre-Paid</div>
-        <p class="muted">
-          Kup kartę przedpłaconą i korzystaj z niej w lokalu. Po zakupie pokaż kod obsłudze przy kasie.
-        </p>
-      </div>
-
-      <div class="card" id="prepaidList"></div>
-
-      <div class="card">
-        <div class="subtitle">Twoje karty</div>
-        <div id="myPrepaidList" class="muted"></div>
-      </div>
     </section>
 
     <!-- TAB: ZAMÓW I ODBIERZ -->
@@ -744,10 +720,6 @@
 
           <button class="btn auth-btn google" id="loginGoogle">
             <i class="fa-brands fa-google"></i> Kontynuuj z Google
-          </button>
-
-          <button class="btn auth-btn apple" id="loginApple" style="background:#111;color:#fff;">
-            <i class="fa-brands fa-apple"></i> Kontynuuj z Apple ID
           </button>
 
           <div class="auth-sep"><span>lub</span></div>
@@ -913,9 +885,6 @@
       <button class="nav-btn" data-tab="rewards">
         <i class="fa-solid fa-gift"></i><div class="lbl">Nagrody</div>
       </button>
-      <button class="nav-btn" data-tab="prepaid">
-        <i class="fa-solid fa-credit-card"></i><div class="lbl">Pre-Paid</div>
-      </button>
       <button class="nav-btn" data-tab="order">
         <i class="fa-solid fa-bag-shopping"></i><div class="lbl">Zamów</div>
       </button>
@@ -979,7 +948,6 @@
     const tabs = {
       points: document.getElementById("tab-points"),
       rewards: document.getElementById("tab-rewards"),
-      prepaid: document.getElementById("tab-prepaid"),
       order: document.getElementById("tab-order"),
       res: document.getElementById("tab-res"),
       account: document.getElementById("tab-account"),
@@ -1062,7 +1030,6 @@
       }).join("");
     }
 
-    // toggle godzin po kliknięciu w status
     openingCardEl.addEventListener("click", ()=>{
       openingCardEl.classList.toggle("expanded");
       const expanded = openingCardEl.classList.contains("expanded");
@@ -1205,118 +1172,6 @@
       renderPoints(); renderRewards();
       showToast(`Nagroda odebrana: ${r.title} 🎁`);
       openTab("rewards");
-    }
-
-    // ---------- Pre-Paid Cards ----------
-    const prepaidCards = [
-      { id:"pp_50",  title:"Karta 50 zł",  value:50,  bonus:0,  desc:"Idealna na szybkie wyjścia" },
-      { id:"pp_100", title:"Karta 100 zł", value:100, bonus:10, desc:"+10 zł bonusu" },
-      { id:"pp_200", title:"Karta 200 zł", value:200, bonus:30, desc:"+30 zł bonusu" },
-    ];
-    const prepaidListEl   = document.getElementById("prepaidList");
-    const myPrepaidListEl = document.getElementById("myPrepaidList");
-
-    function renderPrepaid(){
-      prepaidListEl.innerHTML = prepaidCards.map(c => `
-        <div class="reward">
-          <div class="reward-left">
-            <div class="reward-ico"><i class="fa-solid fa-credit-card"></i></div>
-            <div>
-              <div class="reward-title">${c.title}</div>
-              <div class="tiny">${c.desc}</div>
-              <div class="muted">
-                Wartość: <b>${c.value} zł</b>${c.bonus ? ` + bonus ${c.bonus} zł` : ""}
-              </div>
-            </div>
-          </div>
-          <div style="text-align:right;min-width:110px">
-            <div style="font-weight:900">${c.value} zł</div>
-            <button class="btn btn-primary btn-small" data-buy-prepaid="${c.id}">
-              Kup
-            </button>
-          </div>
-        </div>
-      `).join("");
-
-      prepaidListEl.querySelectorAll("[data-buy-prepaid]").forEach(btn=>{
-        btn.addEventListener("click", ()=> buyPrepaid(btn.dataset.buyPrepaid));
-      });
-
-      renderMyPrepaid();
-    }
-
-    function buyPrepaid(id){
-      const c = prepaidCards.find(x=>x.id===id);
-      if(!c) return;
-
-      const list = store.get("prepaidOwned", []);
-      const code = String(Math.floor(100000 + Math.random()*900000));
-
-      list.unshift({
-        id: crypto.randomUUID(),
-        title: c.title,
-        value: c.value,
-        bonus: c.bonus,
-        total: c.value + c.bonus,
-        code,
-        date: new Date().toLocaleString("pl-PL"),
-        used: false
-      });
-
-      store.set("prepaidOwned", list);
-      renderMyPrepaid();
-      showToast(`Kupiono ${c.title} ✅`);
-      openTab("prepaid");
-    }
-
-    function renderMyPrepaid(){
-      const list = store.get("prepaidOwned", []);
-
-      myPrepaidListEl.innerHTML = list.length
-        ? list.map(p => `
-            <div class="res-item">
-              <b>${p.title} • ${p.total} zł</b>
-              <div class="tiny">Kod: <b style="letter-spacing:2px">${p.code}</b></div>
-              <div class="tiny">Kupiono: ${p.date}</div>
-              <div class="divider"></div>
-              <div class="res-actions">
-                <button class="btn btn-ghost btn-small" data-copy-prepaid="${p.code}">
-                  Kopiuj kod
-                </button>
-                <button class="btn btn-ghost btn-small" data-del-prepaid="${p.id}">
-                  Usuń
-                </button>
-              </div>
-            </div>
-          `).join("")
-        : `<div class="empty">
-            <div class="icon"><i class="fa-solid fa-credit-card"></i></div>
-            <div>
-              <b>Nie masz jeszcze kart</b>
-              <div class="tiny">Kup kartę Pre-Paid, a pojawi się tutaj.</div>
-            </div>
-           </div>`;
-
-      myPrepaidListEl.querySelectorAll("[data-copy-prepaid]").forEach(btn=>{
-        btn.addEventListener("click", async ()=>{
-          try{
-            await navigator.clipboard.writeText(btn.dataset.copyPrepaid);
-            showToast("Kod skopiowany ✅");
-          }catch{
-            showToast("Nie udało się skopiować 🤏", true);
-          }
-        });
-      });
-
-      myPrepaidListEl.querySelectorAll("[data-del-prepaid]").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const id = btn.dataset.delPrepaid;
-          const newList = store.get("prepaidOwned", []).filter(x=>x.id!==id);
-          store.set("prepaidOwned", newList);
-          renderMyPrepaid();
-          showToast("Karta usunięta");
-        });
-      });
     }
 
     // ---------- Order & pickup ----------
@@ -1588,11 +1443,7 @@
       showToast("Zalogowano przez Google ✅");
       openTab("account");
     });
-    document.getElementById("loginApple").addEventListener("click", ()=>{
-      setUser({ provider:"apple", name:"Użytkownik Apple", email:"apple@user.com" });
-      showToast("Zalogowano przez Apple ✅");
-      openTab("account");
-    });
+
     document.getElementById("loginEmailForm").addEventListener("submit", (e)=>{
       e.preventDefault();
       const fd = new FormData(e.target);
@@ -1602,6 +1453,7 @@
       openTab("account");
       e.target.reset();
     });
+
     document.getElementById("logoutBtn").addEventListener("click", ()=>{
       store.set("user", null);
       renderAccount();
@@ -1647,7 +1499,6 @@
     // ---------- Init ----------
     renderPoints();
     renderRewards();
-    renderPrepaid();
     renderMenu();
     renderCart();
     renderOrders();
