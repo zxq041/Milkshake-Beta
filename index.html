@@ -246,6 +246,60 @@
     .quick b{font-size:.95rem;font-weight:900}
     .quick span{font-size:.8rem;opacity:.7}
 
+    /* NEW: Eatmi banner */
+    .eatmi-banner{
+      margin-top:10px;
+      width:100%;
+      background: var(--glass-strong);
+      border: 1px solid rgba(0,0,0,.05);
+      border-radius: 18px;
+      box-shadow: var(--shadow-soft);
+      padding: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition:.2s transform,.2s box-shadow,.2s opacity;
+      text-decoration:none;
+      color: inherit;
+    }
+    .eatmi-banner:active{ transform: translateY(1px); }
+    .eatmi-left{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .eatmi-logo{
+      width:48px;height:48px;border-radius:16px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.06);
+      display:grid;place-items:center;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      overflow:hidden;
+      flex: 0 0 auto;
+    }
+    .eatmi-logo img{ width:100%; height:100%; object-fit:cover; }
+    .eatmi-text{ min-width:0; }
+    .eatmi-text b{ font-weight:900; display:block; }
+    .eatmi-text span{ font-size:.85rem; opacity:.72; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .eatmi-cta{
+      flex:0 0 auto;
+      padding:10px 12px;
+      border-radius:14px;
+      background: var(--grad);
+      color:#fff;
+      font-weight:900;
+      border:none;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      box-shadow: 0 8px 18px rgba(255,106,0,.35);
+    }
+
     /* Rewards */
     .reward{
       display:flex;gap:12px;align-items:center;justify-content:space-between;
@@ -496,6 +550,7 @@
     }
     @media (max-width:380px){
       .quick-grid{grid-template-columns:1fr 1fr}
+      .eatmi-cta{ padding:9px 10px; border-radius:12px; }
     }
   </style>
 </head>
@@ -566,6 +621,23 @@
             <span>Stolik w 10s</span>
           </button>
         </div>
+
+        <!-- NEW: Eatmi full-width bar -->
+        <a class="eatmi-banner" href="https://www.eatmi.pl" target="_blank" rel="noopener">
+          <div class="eatmi-left">
+            <div class="eatmi-logo">
+              <!-- podmień src na swoje logo jeśli chcesz -->
+              <img src="https://eatmi.pl/favicon.ico" alt="Eatmi logo" onerror="this.style.display='none'">
+            </div>
+            <div class="eatmi-text">
+              <b>Eatmi</b>
+              <span>Zamawiaj online szybciej — przejdź do eatmi.pl</span>
+            </div>
+          </div>
+          <div class="eatmi-cta">
+            Przejdź <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </div>
+        </a>
       </div>
 
       <div class="card">
@@ -1004,7 +1076,7 @@
 
     function renderOpeningHours(){
       const now = new Date();
-      const day = now.getDay(); // 0=niedz, 1=pon, ...
+      const day = now.getDay();
       const minutesNow = now.getHours()*60 + now.getMinutes();
 
       const today = openingSchedule[day];
@@ -1017,7 +1089,6 @@
       openDotEl.classList.add(isOpen ? "open" : "closed");
       openTextEl.textContent = isOpen ? "Jesteśmy Otwarci" : "Jesteśmy Zamknięci";
 
-      // dni od poniedziałku do niedzieli
       const order = [1,2,3,4,5,6,0];
       openHoursEl.innerHTML = order.map(d=>{
         const s = openingSchedule[d];
@@ -1067,9 +1138,7 @@
       }
       return String(code);
     }
-    function renderLoyaltyCode(){
-      loyaltyCodeEl.textContent = getOrCreateLoyaltyCode();
-    }
+    function renderLoyaltyCode(){ loyaltyCodeEl.textContent = getOrCreateLoyaltyCode(); }
     function openCodeModal(){
       renderLoyaltyCode();
       codeModal.classList.add("show");
