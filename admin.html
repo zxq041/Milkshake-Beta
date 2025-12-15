@@ -1,2141 +1,1070 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>MilkShake Bar — Panel Administratora</title>
-  <meta name="theme-color" content="#FF6A00"/>
-  <link rel="icon" href="/favicon.png"/>
 
-  <!-- PWA -->
-  <link rel="manifest" href="/manifest.webmanifest"/>
-
+  <meta name="theme-color" content="#FF6A00" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
   <style>
-    :root {
-      --primary-color: #FF6A00;
-      --secondary-color: #FF9100;
-      --accent-color: #FFE0B2;
-      --background-light: #FFF6EC;
-      --background-dark: #22110A;
-      --text-color-dark: #2B1300;
-      --text-color-light: #FFFFFF;
-      --gradient-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      --shadow: 0px 10px 30px rgba(0, 0, 0, 0.12);
-      --border-radius: 20px;
-      --success-color: #16A34A;
-      --error-color: #DC2626;
-      --muted: #8a7c73;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Poppins', sans-serif;
-      color: var(--text-color-dark);
-      background: var(--background-light);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    .container { max-width: 1280px; margin: 0 auto; padding: 0 25px; }
-
-    /* elevated-only pre-login hide */
-    .owner-only { display: none; }
-    .milk-only { display: none; }
-
-    /* Header */
-    .header {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(255,246,236,0.9);
-      backdrop-filter: blur(8px);
-      padding: 14px 0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    .navbar {
-      display:flex; align-items:center; justify-content:space-between;
-      gap: 16px;
-    }
-    .logo {
-      display:flex; align-items:center; gap:12px; text-decoration:none;
-      font-weight: 900; font-size: 1.4rem; color: var(--primary-color);
-    }
-    .logo img {
-      width: 44px; height: 44px; border-radius:50%;
-      box-shadow: var(--shadow);
-    }
-    .header-actions { display:flex; align-items:center; gap:10px; }
-    .pill {
-      padding: 8px 12px; border-radius:999px; font-weight:700;
-      background:#fff; box-shadow: var(--shadow); font-size:0.9rem;
-      display:flex; align-items:center; gap:8px;
+    :root{
+      --primary:#FF6A00;
+      --secondary:#FF9100;
+      --bg:#FFF6EC;
+      --text:#2B1300;
+      --white:#fff;
+      --grad:linear-gradient(135deg,var(--primary),var(--secondary));
+      --shadow:0 14px 40px rgba(0,0,0,.12);
+      --shadow-soft:0 8px 22px rgba(0,0,0,.08);
+      --radius:20px;
+      --glass:rgba(255,255,255,.88);
+      --glass-strong:rgba(255,255,255,.96);
+      --line:rgba(0,0,0,.06);
+      --success:#16A34A;
+      --danger:#DC2626;
+      --muted:rgba(43,19,0,.70);
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    /* Buttons */
-    .btn {
-      padding: 12px 18px; border-radius: 999px; font-weight: 700;
-      border:none; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
-      transition: all .25s ease; text-decoration:none;
-    }
-    .btn-primary {
-      background: var(--gradient-bg); color:#fff;
-      box-shadow: 0 6px 18px rgba(255,106,0,0.45);
-    }
-    .btn-primary:hover { transform: translateY(-2px); }
-    .btn-ghost {
-      background:#fff; color: var(--text-color-dark);
-      box-shadow: var(--shadow);
-    }
-    .btn-ghost:hover { transform: translateY(-2px); }
-    .btn-danger {
-      background: #fff; color: var(--error-color);
-      box-shadow: var(--shadow);
-      border: 2px solid rgba(220,38,38,0.15);
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Poppins,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      min-height:100vh;
+      overflow-x:hidden;
     }
 
-    /* Tabs */
-    .tabs {
-      display:flex; gap:8px; flex-wrap:wrap;
-      margin: 18px 0 8px;
+    .wrap{max-width:1180px;margin:0 auto;padding: calc(14px + var(--safe-top)) 14px calc(16px + var(--safe-bottom));}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:var(--glass);border:1px solid rgba(255,255,255,.98);
+      border-radius:24px;box-shadow:var(--shadow);
+      padding:14px 16px;margin-bottom:12px;
     }
-    .tab-btn{
-      padding: 10px 16px; border-radius:999px; font-weight:800;
-      background:#fff; box-shadow: var(--shadow); border:none; cursor:pointer;
-      display:inline-flex; align-items:center; gap:8px;
-      transition:.2s ease;
+    .brand{display:flex;align-items:center;gap:12px;}
+    .logo{
+      width:46px;height:46px;border-radius:18px;background:var(--grad);color:#fff;
+      display:grid;place-items:center;box-shadow:0 10px 24px rgba(255,106,0,.30);
+      flex:0 0 auto;
     }
-    .tab-btn.active{
-      background: var(--gradient-bg); color:#fff;
-      box-shadow: 0 8px 22px rgba(255,106,0,0.45);
-      transform: translateY(-1px);
-    }
-    .tab-panel{ display:none; }
-    .tab-panel.active{ display:block; }
-
-    /* Layout */
-    .grid {
-      display:grid;
-      grid-template-columns: 320px 1fr;
-      gap: 18px;
-      padding: 10px 0 40px;
-    }
-    @media (max-width: 992px){
-      .grid{ grid-template-columns: 1fr; }
+    .brand h1{font-size:1.05rem;font-weight:900;line-height:1.1}
+    .brand p{font-size:.84rem;opacity:.78;font-weight:800;margin-top:2px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(0,0,0,.06);
+      padding:10px 12px;border-radius:999px;font-weight:900;
+      display:flex;gap:8px;align-items:center;
     }
 
-    /* Sidebar */
-    .card {
-      background:#fff; border-radius: var(--border-radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
+    .btn{
+      border:none; cursor:pointer;
+      font-weight:900;
+      border-radius:16px;
+      padding:12px 14px;
+      display:inline-flex;align-items:center;gap:8px;
+      transition:.15s;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      justify-content:center;
+      color: var(--text);
+      background: rgba(255,255,255,.92);
+      border:1px solid rgba(0,0,0,.06);
+      text-decoration:none;
     }
-    .sidebar .section-title {
-      font-size: 1.2rem; font-weight: 900;
-      margin-bottom: 12px;
-      background: var(--gradient-bg);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{
+      background: var(--grad);
+      color:#fff;
+      border-color: rgba(255,255,255,.18);
+      box-shadow:0 10px 24px rgba(255,106,0,.30);
     }
-    .section-title {
-      font-size: 1.2rem; font-weight: 900;
-      margin-bottom: 12px;
-      background: var(--gradient-bg);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    .btn-danger{
+      background: linear-gradient(135deg, #ff3b3b, #ff7a3b);
+      color:#fff;border-color: rgba(255,255,255,.18);
+      box-shadow:0 10px 24px rgba(255,59,59,.18);
     }
-    .stat {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:12px; border-radius:14px; background: #fff7ef; margin-bottom:10px;
-      font-weight:700;
-    }
-    .stat small { font-weight:600; color: var(--muted); }
+    .btn-small{ padding:9px 10px; border-radius:14px; font-size:.92rem; }
 
-    /* Content header */
-    .content-header {
-      display:flex; align-items:center; justify-content:space-between;
-      gap: 12px; margin-bottom: 12px;
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .tabbtn{
+      border:none;cursor:pointer;
+      padding:12px 12px;border-radius:18px;
+      background:rgba(255,255,255,.90);
+      border:1px solid rgba(0,0,0,.06);
+      font-weight:900;
+      opacity:.86;
+      display:flex;gap:8px;align-items:center;
     }
-    .content-header h2{
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
-      font-weight: 900;
-    }
-
-    /* Reservations list */
-    .reservations {
-      display:grid; gap: 12px;
-    }
-    .reservation-item{
-      border-radius: 16px; padding: 14px;
-      background:#fff; box-shadow: var(--shadow);
-      display:grid; grid-template-columns: 1fr auto; gap: 10px;
-      border-left: 6px solid transparent;
-      touch-action: pan-y;
-    }
-    .reservation-item.new { border-left-color: var(--primary-color); }
-    .reservation-meta{
-      display:flex; flex-wrap:wrap; gap: 8px 12px; font-size:0.95rem;
-    }
-    .tag{
-      display:inline-flex; align-items:center; gap:6px;
-      background:#fff6ec; padding:6px 10px; border-radius:999px;
-      font-weight:700; font-size:0.85rem;
-    }
-    .reservation-notes{
-      margin-top:6px; color:#4a2b15; line-height:1.5;
-    }
-    .reservation-actions{
-      display:flex; flex-direction:column; gap:8px; align-items:flex-end;
-    }
-    .small { font-size:0.85rem; color: var(--muted); font-weight:600; }
-
-    /* Info bar editor */
-    .info-editor textarea{
-      width:100%; min-height:120px; resize: vertical;
-      padding: 14px; border:2px solid #eee; border-radius:14px;
-      font-family:'Poppins',sans-serif; font-size:1rem;
-      transition:.2s ease;
-      outline:none;
-    }
-    .info-editor textarea:focus{
-      border-color: var(--primary-color);
-      box-shadow: 0 6px 18px rgba(255,106,0,0.08);
-    }
-    .info-hint{
-      margin-top:8px; color: var(--muted); line-height:1.6;
-      font-weight:600; font-size:0.95rem;
-    }
-    .info-actions{
-      display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;
+    .tabbtn.active{
+      background:var(--grad);color:#fff;opacity:1;
+      box-shadow:0 12px 26px rgba(255,106,0,.22);
+      border-color:rgba(255,255,255,.2);
     }
 
-    /* Empty state */
-    .empty {
-      text-align:center; padding: 30px 12px; color: var(--muted);
-      font-weight:700; background:#fff; border-radius:16px; box-shadow: var(--shadow);
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .card{
+      background:var(--glass);
+      border:1px solid rgba(255,255,255,.98);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+      padding:16px;
+      overflow:hidden;
     }
+    .section-title{
+      font-size:1.05rem;
+      font-weight:900;
+      background: var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      margin-bottom:10px;
+    }
+    .muted{opacity:.82;color:var(--muted);font-weight:750;line-height:1.55;font-size:.95rem}
 
-    /* Lock screen */
-    .lockscreen{
-      position: fixed; inset:0; z-index: 999;
-      background: radial-gradient(1200px circle at top, #fff 0%, #fff2e5 40%, #ffe9d5 100%);
-      display:flex; align-items:center; justify-content:center;
-      padding: 20px;
-    }
-    .lock-card{
-      width:min(520px, 100%);
-      background:#fff; border-radius: 24px; box-shadow: var(--shadow);
-      padding: 26px;
-      text-align:center;
-    }
-    .lock-card .logo-big{
-      display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px;
-      font-size:1.6rem; font-weight:900; color: var(--primary-color);
-    }
-    .lock-card img{ width:64px; height:64px; border-radius:50%; }
-    .lock-card p{ color: var(--muted); margin-bottom:14px; }
-    .code-input{
-      display:flex; gap: 8px; justify-content:center; margin: 10px 0 16px;
-    }
-    .code-input input{
-      width: 56px; height: 62px; text-align:center; font-size:1.6rem; font-weight:900;
-      border:2px solid #eee; border-radius:12px; outline:none;
-      transition: .2s ease;
-    }
-    .code-input input:focus{ border-color: var(--primary-color); box-shadow: 0 6px 18px rgba(255,106,0,0.12); }
-    .lock-error{
-      color: var(--error-color); font-weight:800; min-height: 1.2em;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 18px; right: 18px; z-index: 9999;
-      background: var(--success-color); color:#fff; font-weight:800;
-      padding: 12px 16px; border-radius: 999px; box-shadow: 0 10px 25px rgba(0,0,0,.25);
-      display:flex; align-items:center; gap:8px; opacity:0; transform: translateY(8px);
-      transition: .25s ease; pointer-events:none;
-    }
-    .toast.visible { opacity:1; transform: translateY(0); }
-    .toast.error { background: var(--error-color); }
-
-    /* =========================
-       MOBILE / TABLET FIXES
-       ========================= */
-    @media (max-width: 768px) {
-      .container { padding: 0 14px; }
-      .navbar{ flex-wrap: wrap; align-items: center; gap: 10px; }
-      .logo{ font-size: 1.1rem; }
-      .logo img{ width: 36px; height: 36px; }
-      .header-actions{ width: 100%; flex-wrap: wrap; justify-content: flex-start; gap: 8px; }
-      .header-actions .btn,
-      .header-actions .pill{ width: 100%; justify-content: center; }
-      .tabs{ gap: 6px; }
-      .tab-btn{ flex: 1 1 auto; justify-content: center; padding: 9px 12px; font-size: 0.95rem; }
-      .grid{ grid-template-columns: 1fr; gap: 12px; }
-      .sidebar{ order: 2; }
-      .reservation-item{ grid-template-columns: 1fr; }
-      .reservation-actions{ flex-direction: row; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 8px; }
-      .reservation-actions .btn{ flex: 1 1 0; justify-content: center; padding: 10px 12px; font-size: 0.9rem; }
-      .tag{ font-size: 0.78rem; padding: 5px 8px; }
-    }
-
-    @media (max-width: 420px){
-      .content-header{ flex-direction: column; align-items: flex-start; }
-      .content-header h2{ font-size: 1.4rem; }
-      .code-input input{ width: 46px; height: 54px; font-size: 1.4rem; }
-    }
-
-    /* =========================
-       MODAL (DODAJ / EDYTUJ)
-       ========================= */
-    .modal-backdrop{
-      position: fixed; inset:0; z-index: 1000;
-      background: rgba(0,0,0,0.35);
-      display:none; align-items:center; justify-content:center;
-      padding: 18px;
-    }
-    .modal-backdrop.show{ display:flex; }
-
-    .modal-card{
-      width:min(560px, 100%);
-      animation: modalIn .18s ease;
-    }
-    @keyframes modalIn{
-      from{ transform: translateY(8px); opacity:0; }
-      to{ transform: translateY(0); opacity:1; }
-    }
-
-    .input{
+    .table{
       width:100%;
-      padding: 12px 14px;
+      border-collapse:separate;
+      border-spacing:0;
+      overflow:hidden;
+      border-radius:18px;
+      border:1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.94);
+    }
+    .table th, .table td{
+      padding:12px 12px;
+      text-align:left;
+      font-size:.92rem;
+      border-bottom:1px solid rgba(0,0,0,.06);
+      vertical-align:top;
+    }
+    .table th{font-weight:900;background:rgba(255,106,0,.08)}
+    .table tr:last-child td{border-bottom:none}
+    .right{text-align:right}
+    .mono{font-variant-numeric: tabular-nums; font-feature-settings:"tnum";}
+
+    label{ font-size:.9rem; font-weight:900; margin:8px 0 6px; display:block; }
+    input,select,textarea{
+      width:100%;
+      padding:12px 14px;
+      border-radius:14px;
       border:2px solid #eee;
-      border-radius:12px;
-      font-family:'Poppins',sans-serif;
+      background: var(--white);
       font-size:1rem;
       outline:none;
-      transition:.2s ease;
+      transition:.15s;
+      font-family:inherit;
     }
-    .input:focus{
-      border-color: var(--primary-color);
-      box-shadow: 0 6px 18px rgba(255,106,0,0.08);
+    textarea{min-height:92px;resize:vertical}
+    input:focus,select:focus,textarea:focus{
+      border-color: var(--primary);
+      box-shadow:0 8px 20px rgba(255,106,0,.10);
+    }
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .row3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+
+    .tag{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
+      font-weight:900;font-size:.78rem;
+      background: rgba(0,0,0,.06);
+      white-space:nowrap;
+    }
+    .tag.ok{background: rgba(22,163,74,.12); color:#0e6b2f;}
+    .tag.pending{background: rgba(255,106,0,.12); color:#8a3d00;}
+    .tag.bad{background: rgba(220,38,38,.12); color:#8a1010;}
+
+    .overlay{
+      position:fixed; inset:0; z-index:90;
+      display:none;
+      background: rgba(0,0,0,.32);
+      backdrop-filter: blur(2px);
+      padding: calc(14px + var(--safe-top)) 14px calc(14px + var(--safe-bottom));
+    }
+    .overlay.show{ display:grid; place-items:center; }
+    .modal{
+      width:min(920px, 100%);
+      background: var(--glass-strong);
+      border-radius:26px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.98);
+      overflow:hidden;
+    }
+    .modal-head{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding:14px 16px;
+      background: rgba(255,246,236,.94);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .modal-head h3{
+      font-size:1.1rem;font-weight:900;
+      background: var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .modal-body{ padding:16px; display:grid; gap:12px; }
+    .close{
+      width:42px;height:42px;border-radius:14px;
+      border:none; cursor:pointer;
+      background:#fff;
+      box-shadow: var(--shadow-soft);
+      display:grid;place-items:center;
     }
 
-    /* =========================
-       FULLSCREEN ALERT (NOWA REZ.)
-       ========================= */
-    .new-res-overlay{
-      position: fixed; inset:0; z-index: 10000;
-      display:none; align-items:center; justify-content:center;
-      padding: 20px;
-      animation: flashBg .8s infinite alternate;
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom: 18px;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--success);
+      color:#fff;
+      font-weight:900;
+      padding:10px 14px;
+      border-radius:999px;
+      box-shadow:0 14px 34px rgba(0,0,0,.25);
+      opacity:0;
+      pointer-events:none;
+      transition:.2s;
+      z-index:200;
+      display:flex; gap:8px; align-items:center;
+      max-width: calc(100% - 28px);
     }
-    .new-res-overlay.show{ display:flex; }
+    .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+    .toast.danger{ background: var(--danger); }
 
-    @keyframes flashBg{
-      0%   { background: #fff; }
-      100% { background: #FF6A00; }
+    @keyframes alarmFlash{0%{background:#FF6A00}50%{background:#fff}100%{background:#FF6A00}}
+    .alarm{
+      position:fixed; inset:0; z-index:400;
+      display:none;
+      padding: calc(14px + var(--safe-top)) 14px calc(14px + var(--safe-bottom));
+      animation: alarmFlash .55s infinite;
     }
+    .alarm.show{display:grid;place-items:center}
+    .alarm-card{
+      width:min(720px,100%);
+      background: rgba(255,255,255,.96);
+      border:1px solid rgba(0,0,0,.08);
+      border-radius:28px;
+      box-shadow:0 20px 70px rgba(0,0,0,.35);
+      padding:18px;
+    }
+    .alarm-head{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-bottom:10px;
+    }
+    .alarm-title{
+      font-weight:900;font-size:1.25rem;
+      background:var(--grad);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .alarm-body{display:grid;gap:10px}
+    .alarm-box{
+      background:#fff;border:1px solid rgba(0,0,0,.08);
+      border-radius:18px;padding:12px;
+      font-weight:800;
+      line-height:1.45;
+    }
+    .alarm-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    .alarm-actions .btn{flex:1 1 160px}
 
-    .new-res-card{
-      width: min(760px, 100%);
-      background: rgba(255,255,255,0.97);
-      border-radius: 28px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-      padding: 32px 26px;
-      text-align:center;
-      animation: popIn .2s ease;
-      border: 3px solid rgba(255,106,0,0.15);
+    @media (max-width: 760px){
+      .row{grid-template-columns:1fr}
+      .row3{grid-template-columns:1fr}
+      .actions{justify-content:stretch}
     }
-    @keyframes popIn{
-      from{ transform: scale(.96); opacity:0; }
-      to{ transform: scale(1); opacity:1; }
-    }
-
-    .new-res-title{
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 900;
-      letter-spacing: 1px;
-      color: #FF6A00;
-      text-shadow: 0 3px 0 rgba(0,0,0,0.05);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-    }
-    .new-res-title i{ color:#FF6A00; font-size: 1.9rem; }
-
-    .new-res-name{
-      margin-top: 8px;
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 900;
-      color: #22110A;
-    }
-
-    .new-res-meta{
-      margin-top: 12px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #4a2b15;
-      display:flex; flex-wrap:wrap; gap:10px; justify-content:center;
-    }
-
-    .new-res-meta .pillish{
-      background: #fff;
-      border: 2px solid rgba(255,106,0,0.15);
-      padding: 8px 12px;
-      border-radius: 999px;
-      font-weight: 800;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
-      color: #2B1300;
-    }
-    .new-res-meta .pillish i{ color: #FF6A00; font-size: 1rem; }
-
-    .new-res-accept{
-      margin-top: 18px;
-      font-size: 1.1rem;
-      padding: 14px 24px;
-      letter-spacing:.2px;
-    }
-
-    /* ===== Swipe -> pokaż "Edytuj" ===== */
-    .reservation-actions .edit-btn { display:none; }
-    .reservation-item.swiped .mark-read-btn{ display:none; }
-    .reservation-item.swiped .edit-btn{ display:inline-flex; }
-    .reservation-item.swiped{
-      border-left-color: #11182710;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.14);
-      transform: translateX(-6px);
-      transition: transform .15s ease;
-    }
-
-    /* ===== Aplikacja Milk ===== */
-    .milk-panel{ display:none; }
-    .milk-panel.active{ display:block; }
-    .milk-subtabs .tab-btn{ font-size:0.95rem; }
-
-    .milk-list-item{
-      border-radius: 16px; padding: 14px;
-      background:#fff; box-shadow: var(--shadow);
-      display:grid; grid-template-columns: 1fr auto; gap: 10px;
-    }
-    .milk-list-actions{ display:flex; gap:8px; align-items:center; }
-    .milk-muted{ color: var(--muted); font-weight:700; }
   </style>
 </head>
 
 <body>
-  <!-- LOCKSCREEN -->
-  <div class="lockscreen" id="lockscreen" aria-live="polite">
-    <div class="lock-card">
-      <div class="logo-big">
-        <img src="https://i.imgur.com/Twr2Rms.jpeg" alt="MilkShake Bar">
-        <span>Panel Administratora</span>
+
+  <!-- ALARM -->
+  <section class="alarm" id="alarm">
+    <div class="alarm-card">
+      <div class="alarm-head">
+        <div class="alarm-title" id="alarmTitle">Nowe zdarzenie</div>
+        <button class="btn btn-small" id="alarmOk"><i class="fa-solid fa-check"></i> OK</button>
       </div>
-      <p>Wpisz kod dostępu, aby przejść do panelu.</p>
-
-      <div class="code-input" id="codeInput">
-        <input inputmode="numeric" maxlength="1" aria-label="cyfra 1">
-        <input inputmode="numeric" maxlength="1" aria-label="cyfra 2">
-        <input inputmode="numeric" maxlength="1" aria-label="cyfra 3">
-        <input inputmode="numeric" maxlength="1" aria-label="cyfra 4">
-      </div>
-
-      <div class="lock-error" id="lockError"></div>
-
-      <button class="btn btn-primary" id="unlockBtn">
-        Zaloguj <i class="fas fa-unlock"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- HEADER -->
-  <header class="header">
-    <div class="container">
-      <nav class="navbar">
-        <a class="logo" href="/admin.html">
-          <img src="https://i.imgur.com/Twr2Rms.jpeg" alt="Logo">
-          <span>MilkShake Bar — Admin</span>
-        </a>
-
-        <div class="header-actions">
-          <div class="pill">
-            <i class="fa-solid fa-circle" id="liveDot" style="color:#16A34A"></i>
-            <span id="liveText">LIVE</span>
-          </div>
-
-          <button class="btn btn-ghost" id="enableSoundBtn">
-            <i class="fa-solid fa-volume-high"></i> Dźwięk
-          </button>
-
-          <button class="btn btn-ghost" id="enableNotifBtn">
-            <i class="fa-regular fa-bell"></i> Powiadomienia
-          </button>
-
-          <button class="btn btn-primary" id="refreshBtn">
-            <i class="fa-solid fa-rotate"></i> Odśwież
-          </button>
-        </div>
-      </nav>
-
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="tab-res-new">
-          <i class="fa-regular fa-clipboard"></i> Nowe rezerwacje
-        </button>
-
-        <button class="tab-btn" data-tab="tab-res-all">
-          <i class="fa-solid fa-layer-group"></i> Wszystkie rezerwacje
-        </button>
-
-        <button class="tab-btn" data-tab="tab-bar">
-          <i class="fa-solid fa-bullhorn"></i> Pasek informacji
-        </button>
-
-        <!-- owner/manager only -->
-        <button class="tab-btn owner-only" data-tab="tab-staff" id="staffTabBtn">
-          <i class="fa-solid fa-users"></i> Pracownicy
-        </button>
-
-        <!-- milk app only for pin 0051 -->
-        <button class="tab-btn milk-only" data-tab="tab-milk-app" id="milkTabBtn" style="display:none;">
-          <i class="fa-solid fa-mobile-screen"></i> Aplikacja Milk
-        </button>
+      <div class="alarm-body">
+        <div class="alarm-box" id="alarmBox">—</div>
+        <div class="alarm-actions" id="alarmActions"></div>
       </div>
     </div>
-  </header>
+  </section>
 
-  <!-- MAIN -->
-  <main class="container">
-    <div class="grid">
-      <!-- SIDEBAR -->
-      <aside class="sidebar card">
-        <div class="section-title">Podsumowanie</div>
+  <div class="wrap" id="app">
 
-        <div class="stat">
-          <div>
-            Wszystkie rezerwacje<br>
-            <small>od początku</small>
-          </div>
-          <div id="statTotal">0</div>
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo"><i class="fa-solid fa-shield-halved"></i></div>
+        <div>
+          <h1>MilkShake Bar — Admin</h1>
+          <p id="who">tryb awaryjny • bez logowania</p>
         </div>
+      </div>
 
-        <div class="stat">
-          <div>
-            Nowe rezerwacje<br>
-            <small>nieobsłużone</small>
-          </div>
-          <div id="statNew">0</div>
+      <div class="actions">
+        <a class="btn" href="appadmin.html" id="goAppAdmin"><i class="fa-solid fa-mobile-screen"></i> Panel aplikacji</a>
+        <button class="btn" id="refreshBtn"><i class="fa-solid fa-rotate"></i> Odśwież</button>
+        <!-- usunięto wyloguj -->
+      </div>
+    </header>
+
+    <div class="tabs">
+      <button class="tabbtn active" data-tab="new"><i class="fa-solid fa-bell"></i> Nowe</button>
+      <button class="tabbtn" data-tab="all"><i class="fa-solid fa-list"></i> Wszystkie</button>
+      <button class="tabbtn" data-tab="happy"><i class="fa-solid fa-bullhorn"></i> Pasek info</button>
+      <button class="tabbtn" data-tab="staff"><i class="fa-solid fa-users"></i> Pracownicy</button>
+      <button class="tabbtn" data-tab="orders"><i class="fa-solid fa-bag-shopping"></i> Zamówienia</button>
+    </div>
+
+    <!-- TAB: NEW -->
+    <section class="tab" id="tab-new">
+      <div class="grid">
+        <div class="card" style="grid-column: span 12;">
+          <div class="section-title">Nowe rezerwacje (ostatnie)</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Data zgłoszenia</th>
+                <th>Klient</th>
+                <th>Termin</th>
+                <th>Szczegóły</th>
+                <th class="right">Akcje</th>
+              </tr>
+            </thead>
+            <tbody id="newBody">
+              <tr><td colspan="5" class="muted">Ładowanie…</td></tr>
+            </tbody>
+          </table>
         </div>
+      </div>
+    </section>
 
-        <div class="stat">
-          <div>
-            Dzisiaj<br>
-            <small>(lokalnie)</small>
-          </div>
-          <div id="statToday">0</div>
-        </div>
-
-        <p class="small" style="margin-top:12px;line-height:1.5">
-          Panel działa jako PWA (można dodać na ekran główny).  
-          Dźwięk na telefonie wymaga jednorazowego kliknięcia „Dźwięk”.
-          W tle działa tylko powiadomienie push i wibracja.
-        </p>
-      </aside>
-
-      <!-- CONTENT -->
-      <section>
-
-        <!-- TAB: NOWE REZERWACJE -->
-        <div class="tab-panel active" id="tab-res-new">
-          <div class="content-header">
-            <h2>Nowe rezerwacje</h2>
-
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <button class="btn btn-primary" id="addReservationBtn">
-                <i class="fa-solid fa-plus"></i> Dodaj rezerwację
-              </button>
-              <div class="small" id="lastSync">Ostatnia synchronizacja: —</div>
-            </div>
-          </div>
-
-          <div class="reservations" id="newReservationsList">
-            <div class="empty">Ładuję rezerwacje...</div>
-          </div>
-        </div>
-
-        <!-- TAB: WSZYSTKIE REZERWACJE -->
-        <div class="tab-panel" id="tab-res-all">
-          <div class="content-header">
-            <h2>Wszystkie rezerwacje</h2>
-            <div class="small">Tutaj są również przeczytane.</div>
-          </div>
-
-          <div class="reservations" id="allReservationsList">
-            <div class="empty">Ładuję rezerwacje...</div>
-          </div>
-        </div>
-
-        <!-- TAB: INFO BAR -->
-        <div class="tab-panel" id="tab-bar">
-          <div class="content-header">
-            <h2>Pasek informacji</h2>
-            <div class="small" id="barStatus">Status: —</div>
-          </div>
-
-          <div class="card info-editor">
-            <textarea id="infoBarText" placeholder="Np. Dziś -15% przy zakupach od 100 zł"></textarea>
-            <div class="info-hint">
-              Ten tekst wyświetli się jako cienki pasek na samej górze strony głównej.  
-              Zostaw puste i zapisz, aby pasek zniknął.
-            </div>
-
-            <div class="info-actions">
-              <button class="btn btn-primary" id="saveInfoBarBtn">
-                <i class="fa-solid fa-floppy-disk"></i> Zapisz
-              </button>
-              <button class="btn btn-danger" id="clearInfoBarBtn">
-                <i class="fa-solid fa-trash"></i> Usuń pasek
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- TAB: PRACOWNICY (owner/manager only) -->
-        <div class="tab-panel owner-only" id="tab-staff">
-          <div class="content-header">
-            <h2>Pracownicy</h2>
-            <div class="small">Dostępne tylko dla Właściciela / Menagera</div>
-          </div>
-
-          <div class="card" style="display:grid; gap:12px;">
-            <form id="addEmployeeForm" style="display:grid; gap:10px;">
-              <label>
-                <div class="small" style="margin-bottom:4px;">Imię i nazwisko</div>
-                <input required name="empName" class="input" placeholder="Np. Anna Nowak">
-              </label>
-
-              <label>
-                <div class="small" style="margin-bottom:4px;">Login (4 cyfry)</div>
-                <input required name="empPin" class="input" inputmode="numeric" maxlength="4" placeholder="Np. 0043">
-              </label>
-
-              <label>
-                <div class="small" style="margin-bottom:4px;">Stanowisko</div>
-                <select required name="empRole" class="input">
-                  <option value="manager">Właściciel / Menager</option>
-                  <option value="employee" selected>Pracownik</option>
-                </select>
-              </label>
-
-              <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
-                <button type="submit" class="btn btn-primary">
-                  <i class="fa-solid fa-user-plus"></i> Dodaj konto
-                </button>
-              </div>
-              <div class="small" id="empHint" style="color:var(--muted); font-weight:700;"></div>
-            </form>
-
+    <!-- TAB: ALL -->
+    <section class="tab" id="tab-all" style="display:none">
+      <div class="grid">
+        <div class="card" style="grid-column: span 12;">
+          <div class="section-title">Wszystkie rezerwacje</div>
+          <div class="row" style="margin-bottom:10px">
             <div>
-              <div class="small" style="margin-bottom:8px;">Lista kont</div>
-              <div class="reservations" id="employeesList">
-                <div class="empty">Ładuję konta...</div>
-              </div>
+              <label>Szukaj</label>
+              <input id="resSearch" placeholder="Imię, tel, data, sala…" autocomplete="off">
+            </div>
+            <div>
+              <label>Źródło</label>
+              <select id="resSource">
+                <option value="">Wszystkie</option>
+                <option value="index">index.html</option>
+                <option value="app">app.html</option>
+              </select>
             </div>
           </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Data zgłoszenia</th>
+                <th>Klient</th>
+                <th>Termin</th>
+                <th>Szczegóły</th>
+                <th class="right">Akcje</th>
+              </tr>
+            </thead>
+            <tbody id="allBody">
+              <tr><td colspan="5" class="muted">Ładowanie…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: HAPPY -->
+    <section class="tab" id="tab-happy" style="display:none">
+      <div class="grid">
+        <div class="card" style="grid-column: span 12;">
+          <div class="section-title">Pasek informacji (Happy Bar)</div>
+          <label>Treść</label>
+          <textarea id="happyText" placeholder="Wpisz tekst paska informacji…"></textarea>
+          <div style="height:10px"></div>
+          <button class="btn btn-primary" id="saveHappy"><i class="fa-solid fa-floppy-disk"></i> Zapisz</button>
+          <div class="muted" style="margin-top:10px" id="happyState">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: STAFF -->
+    <section class="tab" id="tab-staff" style="display:none">
+      <div class="grid">
+        <div class="card" style="grid-column: span 5;">
+          <div class="section-title">Dodaj pracownika</div>
+
+          <label>Imię</label>
+          <input id="empName" placeholder="np. Kasia">
+
+          <div class="row" style="margin-top:8px">
+            <div>
+              <label>PIN (4 cyfry)</label>
+              <input id="empPin" placeholder="np. 1234" inputmode="numeric" autocomplete="off">
+            </div>
+            <div>
+              <label>Rola</label>
+              <select id="empRole">
+                <option value="employee">Pracownik</option>
+                <option value="manager">Manager</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="height:10px"></div>
+          <button class="btn btn-primary" id="addEmp"><i class="fa-solid fa-user-plus"></i> Dodaj</button>
+
+          <div class="muted" style="margin-top:10px" id="empState">—</div>
         </div>
 
-        <!-- TAB: APLIKACJA MILK (tylko pin 0051) -->
-        <div class="tab-panel milk-only" id="tab-milk-app" style="display:none;">
-          <div class="content-header">
-            <h2>Aplikacja Milk (Proszę Nic Nie Klikać w Tej sekcji : Gracjan)</h2>
-            <div class="small" id="milkStatus">Status: Offline/div>
-          </div>
-
-          <!-- Subtabs -->
-          <div class="tabs milk-subtabs" style="margin-top:0">
-            <button class="tab-btn active" data-milk-tab="milk-home">
-              <i class="fa-solid fa-house"></i> Strona główna
-            </button>
-            <button class="tab-btn" data-milk-tab="milk-points">
-              <i class="fa-solid fa-coins"></i> Punkty (Milkosy)
-            </button>
-            <button class="tab-btn" data-milk-tab="milk-rewards">
-              <i class="fa-solid fa-gift"></i> Nagrody
-            </button>
-            <button class="tab-btn" data-milk-tab="milk-users">
-              <i class="fa-solid fa-users"></i> Użytkownicy
-            </button>
-            <button class="tab-btn" data-milk-tab="milk-pickup">
-              <i class="fa-solid fa-ticket"></i> Odbiór nagrody
-            </button>
-          </div>
-
-          <!-- Subpanel: HOME -->
-          <div class="milk-panel active" id="milk-home">
-            <div class="grid" style="grid-template-columns: 1fr 1fr; padding-top:0;">
-              <div class="card">
-                <div class="section-title">Statystyki aplikacji</div>
-                <div class="stat"><div>Użytkownicy zarejestrowani</div><div id="milkStatUsers">0</div></div>
-                <div class="stat"><div>Łącznie Milkosów</div><div id="milkStatPoints">0</div></div>
-                <div class="stat"><div>Wymiany nagród</div><div id="milkStatRedeems">0</div></div>
-                <button class="btn btn-primary" id="milkRefreshStats" style="margin-top:8px;">
-                  <i class="fa-solid fa-rotate"></i> Odśwież statystyki
-                </button>
-              </div>
-
-              <div class="card">
-                <div class="section-title">Szybkie akcje</div>
-                <p class="small" style="line-height:1.6; margin-bottom:10px;">
-                  Milkosy: 10 zł = 1 Milkos.  
-                  Punkty dodajesz po identyfikatorze użytkownika.
-                </p>
-                <button class="btn btn-ghost" id="milkOpenAddPoints">
-                  <i class="fa-solid fa-plus"></i> Dodaj Milkosy
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Subpanel: POINTS -->
-          <div class="milk-panel" id="milk-points">
-            <div class="card" style="display:grid; gap:10px;">
-              <div class="section-title">Dodaj Milkosy</div>
-
-              <form id="milkAddPointsForm" style="display:grid; gap:10px;">
-                <label>
-                  <div class="small" style="margin-bottom:4px;">Identyfikator użytkownika</div>
-                  <input required name="userId" class="input" placeholder="Np. 2f8a-91ab...">
-                </label>
-
-                <label>
-                  <div class="small" style="margin-bottom:4px;">Kwota wydana (zł)</div>
-                  <input required name="amount" class="input" type="number" min="0" step="0.01" placeholder="Np. 50">
-                </label>
-
-                <div class="small" id="milkPointsPreview">Milkosy do dodania: —</div>
-
-                <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="fa-solid fa-coins"></i> Dodaj punkty
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- Subpanel: REWARDS -->
-          <div class="milk-panel" id="milk-rewards">
-            <div class="grid" style="grid-template-columns: 360px 1fr; padding-top:0;">
-              <div class="card">
-                <div class="section-title">Dodaj nagrodę</div>
-
-                <form id="milkAddRewardForm" style="display:grid; gap:10px;">
-                  <label>
-                    <div class="small" style="margin-bottom:4px;">Nazwa nagrody</div>
-                    <input required name="title" class="input" placeholder="Np. Voucher 100 zł">
-                  </label>
-
-                  <label>
-                    <div class="small" style="margin-bottom:4px;">Koszt (Milkosy)</div>
-                    <input required name="cost" class="input" type="number" min="1" step="1" placeholder="Np. 10">
-                  </label>
-
-                  <label>
-                    <div class="small" style="margin-bottom:4px;">Opis (opcjonalnie)</div>
-                    <textarea name="desc" class="input" style="min-height:80px; resize:vertical;" placeholder="Opis nagrody"></textarea>
-                  </label>
-
-                  <button class="btn btn-primary" type="submit">
-                    <i class="fa-solid fa-gift"></i> Dodaj nagrodę
-                  </button>
-                  <div class="small" id="milkRewardHint"></div>
-                </form>
-              </div>
-
-              <div class="card">
-                <div class="section-title">Lista nagród</div>
-                <div class="reservations" id="milkRewardsList">
-                  <div class="empty">Ładuję nagrody...</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Subpanel: USERS -->
-          <div class="milk-panel" id="milk-users">
-            <div class="card">
-              <div class="section-title">Użytkownicy</div>
-              <div class="small" style="margin-bottom:8px;">Kliknij użytkownika, aby zobaczyć ostatnie wymiany nagród.</div>
-              <div class="reservations" id="milkUsersList">
-                <div class="empty">Ładuję użytkowników...</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Subpanel: PICKUP -->
-          <div class="milk-panel" id="milk-pickup">
-            <div class="card" style="display:grid; gap:10px;">
-              <div class="section-title">Odbiór nagrody po kodzie</div>
-
-              <form id="milkPickupForm" style="display:grid; gap:10px;">
-                <label>
-                  <div class="small" style="margin-bottom:4px;">Kod nagrody</div>
-                  <input required name="code" class="input" placeholder="Np. ABCD-100">
-                </label>
-
-                <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
-                  <button class="btn btn-primary" type="submit">
-                    <i class="fa-solid fa-check"></i> Sprawdź / Odbierz
-                  </button>
-                </div>
-
-                <div class="small" id="milkPickupResult"></div>
-              </form>
-            </div>
-          </div>
+        <div class="card" style="grid-column: span 7;">
+          <div class="section-title">Lista pracowników</div>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Imię</th>
+                <th>PIN</th>
+                <th>Rola</th>
+                <th class="right">Akcja</th>
+              </tr>
+            </thead>
+            <tbody id="empBody">
+              <tr><td colspan="4" class="muted">Ładowanie…</td></tr>
+            </tbody>
+          </table>
         </div>
-
-      </section>
-    </div>
-  </main>
-
-  <!-- MODAL: szczegóły użytkownika -->
-  <div id="milkUserModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card card">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-        <h3 style="font-size:1.4rem; font-weight:900;">Użytkownik</h3>
-        <button class="btn btn-ghost" id="milkCloseUserModal" aria-label="Zamknij">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
       </div>
+    </section>
 
-      <div id="milkUserModalBody" style="margin-top:10px; display:grid; gap:10px;">
-        <!-- wypełnia JS -->
+    <!-- TAB: ORDERS -->
+    <section class="tab" id="tab-orders" style="display:none">
+      <div class="grid">
+        <div class="card" style="grid-column: span 12;">
+          <div class="section-title">Zamówienia “Zamów i odbierz” (podgląd)</div>
+          <div class="muted" style="margin-bottom:10px">
+            Pełne zarządzanie zamówieniami jest w <b>Panelu aplikacji</b>. Tutaj masz podgląd + alarm jak przy rezerwacjach.
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Milk ID</th>
+                <th>Lokal</th>
+                <th class="right">Suma</th>
+                <th class="right">Status</th>
+                <th class="right">Akcja</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody">
+              <tr><td colspan="6" class="muted">Ładowanie…</td></tr>
+            </tbody>
+          </table>
+
+          <div style="height:10px"></div>
+          <a class="btn btn-primary" href="appadmin.html?tab=orders">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Otwórz Panel aplikacji (Zamówienia)
+          </a>
+        </div>
       </div>
+    </section>
+
+  </div>
+
+  <!-- MODAL -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Szczegóły</h3>
+        <button class="close" id="modalClose" aria-label="Zamknij"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
 
-  <!-- FULLSCREEN ALERT: NOWA REZERWACJA -->
-  <div id="newResOverlay" class="new-res-overlay" aria-hidden="true">
-    <div class="new-res-card">
-      <div class="new-res-title">
-        <i class="fa-solid fa-bell"></i>
-        NOWA REZERWACJA
-      </div>
-      <div class="new-res-name" id="newResName">—</div>
-      <div class="new-res-meta" id="newResMeta">—</div>
+  <!-- TOAST -->
+  <div class="toast" id="toast"><i class="fa-solid fa-check-circle"></i><span id="toastText"></span></div>
 
-      <button class="btn btn-primary new-res-accept" id="acceptNewResBtn">
-        Akceptuj <i class="fa-solid fa-check"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- toast -->
-  <div class="toast" id="toast">
-    <i class="fa-solid fa-bell"></i>
-    <span id="toastText">Nowa rezerwacja!</span>
-  </div>
-
-  <!-- MODAL: ręczne dodanie rezerwacji -->
-  <div id="addReservationModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card card">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-        <h3 style="font-size:1.4rem; font-weight:900;">Dodaj rezerwację</h3>
-        <button class="btn btn-ghost" id="closeAddReservationModal" aria-label="Zamknij">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <form id="addReservationForm" style="margin-top:12px; display:grid; gap:10px;">
-        <label>
-          <div class="small" style="margin-bottom:4px;">Imię i nazwisko</div>
-          <input required name="name" class="input" placeholder="Np. Jan Kowalski">
-        </label>
-
-        <label>
-          <div class="small" style="margin-bottom:4px;">Telefon</div>
-          <input required name="phone" class="input" placeholder="Np. 500600700">
-        </label>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <label>
-            <div class="small" style="margin-bottom:4px;">Data</div>
-            <input required name="date" type="date" class="input">
-          </label>
-
-          <label>
-            <div class="small" style="margin-bottom:4px;">Godzina</div>
-            <input required name="time" type="time" class="input">
-          </label>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <label>
-            <div class="small" style="margin-bottom:4px;">Liczba osób</div>
-            <input required name="guests" type="number" min="1" class="input" placeholder="Np. 4">
-          </label>
-
-          <label>
-            <div class="small" style="margin-bottom:4px;">Sala / strefa</div>
-            <input required name="room" class="input" placeholder="Np. Sala główna / VIP">
-          </label>
-        </div>
-
-        <label>
-          <div class="small" style="margin-bottom:4px;">Uwagi (opcjonalnie)</div>
-          <textarea name="notes" class="input" style="min-height:80px; resize:vertical;" placeholder="Np. tort urodzinowy"></textarea>
-        </label>
-
-        <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:6px;">
-          <button type="button" class="btn btn-danger" id="cancelAddReservation">
-            Anuluj
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <i class="fa-solid fa-floppy-disk"></i> Zapisz rezerwację
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: edycja rezerwacji -->
-  <div id="editReservationModal" class="modal-backdrop" aria-hidden="true">
-    <div class="modal-card card">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-        <h3 style="font-size:1.4rem; font-weight:900;">Edytuj rezerwację</h3>
-        <button class="btn btn-ghost" id="closeEditReservationModal" aria-label="Zamknij">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
-      <form id="editReservationForm" style="margin-top:12px; display:grid; gap:10px;">
-        <input type="hidden" name="id">
-
-        <label>
-          <div class="small" style="margin-bottom:4px;">Imię i nazwisko</div>
-          <input required name="name" class="input">
-        </label>
-
-        <label>
-          <div class="small" style="margin-bottom:4px;">Telefon</div>
-          <input required name="phone" class="input">
-        </label>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <label>
-            <div class="small" style="margin-bottom:4px;">Data</div>
-            <input required name="date" type="date" class="input">
-          </label>
-
-          <label>
-            <div class="small" style="margin-bottom:4px;">Godzina</div>
-            <input required name="time" type="time" class="input">
-          </label>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <label>
-            <div class="small" style="margin-bottom:4px;">Liczba osób</div>
-            <input required name="guests" type="number" min="1" class="input">
-          </label>
-
-          <label>
-            <div class="small" style="margin-bottom:4px;">Sala / strefa</div>
-            <input required name="room" class="input">
-          </label>
-        </div>
-
-        <label>
-          <div class="small" style="margin-bottom:4px;">Uwagi (opcjonalnie)</div>
-          <textarea name="notes" class="input" style="min-height:80px; resize:vertical;"></textarea>
-        </label>
-
-        <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; margin-top:6px;">
-          <button type="button" class="btn btn-danger" id="cancelEditReservation">
-            Anuluj
-          </button>
-          <button type="submit" class="btn btn-primary">
-            <i class="fa-solid fa-floppy-disk"></i> Zapisz zmiany
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- socket.io -->
-  <script src="/socket.io/socket.io.js"></script>
   <script>
-    // =========================
-    //  Tabs
-    // =========================
-    const tabBtns = document.querySelectorAll(".tab-btn[data-tab]");
-    const tabPanels = document.querySelectorAll(".tab-panel");
-    tabBtns.forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        tabBtns.forEach(b=>b.classList.remove("active"));
-        tabPanels.forEach(p=>p.classList.remove("active"));
-        btn.classList.add("active");
-        document.getElementById(btn.dataset.tab).classList.add("active");
-      });
-    });
+    const $ = (q, el=document) => el.querySelector(q);
+    const $$ = (q, el=document) => Array.from(el.querySelectorAll(q));
 
-    // =========================
-    //  PWA / Service Worker
-    // =========================
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js").catch(console.error);
-      });
-    }
-
-    // =========================
-    //  Lock screen (API login)
-    // =========================
-    const lockscreen = document.getElementById("lockscreen");
-    const lockError = document.getElementById("lockError");
-    const unlockBtn = document.getElementById("unlockBtn");
-    const codeBoxes = [...document.querySelectorAll("#codeInput input")];
-
-    let currentRole = null; // "owner" | "manager" | "employee"
-    let currentEmployee = null;
-
-    function getTypedPin(){
-      return codeBoxes.map(b => b.value.trim()).join("");
-    }
-    function clearPin(){
-      codeBoxes.forEach(b => b.value="");
-      codeBoxes[0].focus();
-    }
-
-    function applyRoleVisibility(){
-      const elevated = (currentRole === "owner" || currentRole === "manager");
-      const elevatedEls = document.querySelectorAll(".owner-only");
-      const staffTabBtn = document.getElementById("staffTabBtn");
-      const staffPanel = document.getElementById("tab-staff");
-
-      if(elevated){
-        elevatedEls.forEach(el => el.style.display = "");
-        staffTabBtn && (staffTabBtn.style.display = "");
-        staffPanel && (staffPanel.style.display = "");
-      } else {
-        elevatedEls.forEach(el => el.style.display = "none");
-        staffTabBtn && (staffTabBtn.style.display = "none");
-        staffPanel && (staffPanel.style.display = "none");
-        document.querySelector('[data-tab="tab-res-new"]')?.click();
-      }
-
-      // ===== Milk App access: tylko PIN 0051 =====
-      const milkAccess = String(currentEmployee?.pin || "") === "0051";
-      document.querySelectorAll(".milk-only").forEach(el=>{
-        el.style.display = milkAccess ? "" : "none";
-      });
-      if(!milkAccess){
-        if(document.getElementById("tab-milk-app")?.classList.contains("active")){
-          document.querySelector('[data-tab="tab-res-new"]')?.click();
-        }
-      }
-    }
-
-    async function tryUnlock(){
-      const typed = getTypedPin();
-      if(typed.length !== 4) return;
-
-      try{
-        const res = await fetch("/api/login", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ pin: typed })
-        });
-        const data = await res.json().catch(()=> ({}));
-        if(!res.ok || !data.ok){
-          lockError.textContent = data.message || "Niepoprawny kod.";
-          clearPin();
-          return;
-        }
-
-        currentRole = data.role; // owner/manager/employee
-        currentEmployee = data.user || null;
-
-        lockscreen.style.display = "none";
-        showToast(`Zalogowano: ${currentEmployee?.name || "OK"} ✅`);
-        requestNotificationPermission();
-        fetchInfoBar();
-        applyRoleVisibility();
-        if(currentRole !== "employee") renderEmployees();
-      }catch(e){
-        console.error(e);
-        lockError.textContent = "Błąd logowania (sieć).";
-        clearPin();
-      }
-    }
-
-    unlockBtn.addEventListener("click", tryUnlock);
-    codeBoxes.forEach((box, i) => {
-      box.addEventListener("input", ()=>{
-        lockError.textContent = "";
-        box.value = box.value.replace(/\D/g,"").slice(0,1);
-        if(box.value && codeBoxes[i+1]) codeBoxes[i+1].focus();
-        if(getTypedPin().length === 4) tryUnlock();
-      });
-      box.addEventListener("keydown",(e)=>{
-        if(e.key==="Backspace" && !box.value && codeBoxes[i-1]) codeBoxes[i-1].focus();
-      });
-    });
-    clearPin();
-
-    // =========================
-    //  Toast helper
-    // =========================
-    const toast = document.getElementById("toast");
-    const toastText = document.getElementById("toastText");
-    function showToast(msg, isError=false){
+    // ---------------- Toast
+    const toastEl = $("#toast");
+    const toastText = $("#toastText");
+    function toast(msg, danger=false){
       toastText.textContent = msg;
-      toast.classList.toggle("error", isError);
-      toast.classList.add("visible");
-      setTimeout(()=>toast.classList.remove("visible"), 3500);
+      toastEl.classList.toggle("danger", danger);
+      toastEl.classList.add("show");
+      clearTimeout(toastEl._t);
+      toastEl._t = setTimeout(()=>toastEl.classList.remove("show"), 2600);
     }
 
-    // =========================
-    //  Sound enable (MOBILE FIX)
-    // =========================
-    let audioCtx;
-    let soundEnabled = localStorage.getItem("soundEnabled") === "1";
+    // ---------------- Modal
+    const overlay = $("#overlay");
+    const modalTitle = $("#modalTitle");
+    const modalBody = $("#modalBody");
+    $("#modalClose").addEventListener("click", ()=> overlay.classList.remove("show"));
+    overlay.addEventListener("click", (e)=>{ if(e.target === overlay) overlay.classList.remove("show"); });
+    function openModal(title, html){
+      modalTitle.textContent = title;
+      modalBody.innerHTML = html;
+      overlay.classList.add("show");
+    }
 
-    async function enableSound(){
+    // ---------------- Helpers
+    function esc(s){
+      return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+    function formatDateTime(dt){
+      if(!dt) return "—";
+      try{ return new Date(dt).toLocaleString("pl-PL"); }
+      catch{ return String(dt); }
+    }
+    function statusTag(s){
+      const v = String(s||"").toLowerCase();
+      if(v.includes("wydane")) return `<span class="tag ok"><i class="fa-solid fa-check"></i> Wydane</span>`;
+      if(v.includes("gotowe")) return `<span class="tag ok"><i class="fa-solid fa-bell"></i> Gotowe</span>`;
+      if(v.includes("anul")) return `<span class="tag bad"><i class="fa-solid fa-xmark"></i> Anulowane</span>`;
+      if(v.includes("real")) return `<span class="tag pending"><i class="fa-solid fa-hourglass-half"></i> W realizacji</span>`;
+      return `<span class="tag pending"><i class="fa-solid fa-inbox"></i> ${esc(s||"Przyjęte")}</span>`;
+    }
+
+    // ---------------- Alarm (miganie + głośny pisk aż do OK)
+    const alarmEl = $("#alarm");
+    const alarmTitle = $("#alarmTitle");
+    const alarmBox = $("#alarmBox");
+    const alarmActions = $("#alarmActions");
+    const alarmOk = $("#alarmOk");
+
+    let audioCtx = null;
+    let osc = null;
+    let gain = null;
+
+    function startSiren(){
       try{
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        if(audioCtx.state === "suspended") await audioCtx.resume();
-        soundEnabled = true;
-        localStorage.setItem("soundEnabled","1");
-        showToast("Dźwięk włączony 🔊");
-      }catch(e){
-        console.warn(e);
-        showToast("Nie udało się włączyć dźwięku", true);
-      }
-    }
-    document.getElementById("enableSoundBtn").addEventListener("click", enableSound);
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx.state === "suspended") audioCtx.resume();
 
-    // =========================
-    //  Bell sound (10s)
-    // =========================
-    function playBellFor10s(){
-      if(!soundEnabled) return;
+        osc = audioCtx.createOscillator();
+        gain = audioCtx.createGain();
+        osc.type = "square";
+        osc.frequency.value = 1600;
+        gain.gain.value = 0.25;
+        osc.connect(gain).connect(audioCtx.destination);
+        osc.start();
 
-      try{
-        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-        if(audioCtx.state === "suspended"){
-          audioCtx.resume();
-        }
-
-        const now = audioCtx.currentTime;
-        const duration = 10;
-        const freqs = [880, 1320, 1760];
-
-        const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.exponentialRampToValueAtTime(0.9, now + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.25, now + duration * 0.6);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-        gain.connect(audioCtx.destination);
-
-        freqs.forEach(f=>{
-          const o = audioCtx.createOscillator();
-          o.type="sine";
-          o.frequency.setValueAtTime(f, now);
-          o.connect(gain);
-          o.start(now);
-          o.stop(now + duration);
-        });
-      }catch(e){
-        console.warn("Audio failed", e);
-      }
+        let up = true;
+        const t = setInterval(()=>{
+          if(!osc) return clearInterval(t);
+          osc.frequency.value = up ? 1750 : 1450;
+          up = !up;
+        }, 180);
+        alarmEl._t = t;
+      }catch(e){}
     }
 
-    // =========================
-    //  Notifications (PWA)
-    // =========================
-    async function requestNotificationPermission(){
-      if(!("Notification" in window)) return;
-      if(Notification.permission === "granted") return;
-      try{ await Notification.requestPermission(); }catch(e){}
+    function stopSiren(){
+      try{ clearInterval(alarmEl._t); }catch{}
+      try{ osc && osc.stop(); }catch{}
+      osc = null;
+      try{ gain && gain.disconnect(); }catch{}
+      gain = null;
     }
 
-    async function fireNotification(reservation){
-      if(!("Notification" in window)) return;
-      if(Notification.permission !== "granted") return;
-
-      const title = "Nowa rezerwacja!";
-      const body = `${reservation.name} • ${reservation.date} ${reservation.time} • ${reservation.guests} os. • ${reservation.room}`;
-      const options = {
-        body,
-        icon: "/favicon.png",
-        badge: "/favicon.png",
-        data: reservation,
-        vibrate: [250, 200, 250, 200, 250],
-        tag: "new-reservation"
-      };
-
-      const reg = await navigator.serviceWorker.getRegistration();
-      if(reg) reg.showNotification(title, options);
-      else new Notification(title, options);
+    function showAlarm({title, html, actionsHtml}){
+      alarmTitle.textContent = title;
+      alarmBox.innerHTML = html;
+      alarmActions.innerHTML = actionsHtml || "";
+      alarmEl.classList.add("show");
+      startSiren();
     }
 
-    document.getElementById("enableNotifBtn").addEventListener("click", async ()=>{
-      await requestNotificationPermission();
-      if(Notification.permission==="granted") showToast("Powiadomienia włączone ✅");
-      else showToast("Nie udało się włączyć powiadomień", true);
-    });
-
-    // =========================
-    //  FULLSCREEN ALERT logic
-    // =========================
-    const newResOverlay = document.getElementById("newResOverlay");
-    const newResName = document.getElementById("newResName");
-    const newResMeta = document.getElementById("newResMeta");
-    const acceptNewResBtn = document.getElementById("acceptNewResBtn");
-
-    let overlayQueue = [];
-    let overlayActive = false;
-
-    function formatOverlayMeta(r){
-      const parts = [
-        r.date ? `<span class="pillish"><i class="fa-regular fa-calendar"></i> ${r.date}</span>` : "",
-        r.time ? `<span class="pillish"><i class="fa-regular fa-clock"></i> ${r.time}</span>` : "",
-        r.guests ? `<span class="pillish"><i class="fa-solid fa-user-group"></i> ${r.guests} os.</span>` : "",
-        r.room ? `<span class="pillish"><i class="fa-solid fa-door-open"></i> ${r.room}</span>` : "",
-        r.phone ? `<span class="pillish"><i class="fa-solid fa-phone"></i> ${r.phone}</span>` : ""
-      ].filter(Boolean);
-      return parts.join("");
+    function hideAlarm(){
+      alarmEl.classList.remove("show");
+      stopSiren();
     }
+    alarmOk.addEventListener("click", hideAlarm);
 
-    function showNewReservationOverlay(r){
-      overlayQueue.push(r);
-      if(overlayActive) return;
-      overlayActive = true;
-
-      const next = overlayQueue.shift();
-      if(!next){
-        overlayActive = false;
-        return;
-      }
-
-      newResName.textContent = next.name || "—";
-      newResMeta.innerHTML = formatOverlayMeta(next);
-
-      newResOverlay.classList.add("show");
-      newResOverlay.setAttribute("aria-hidden","false");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    // ---------------- Tabs
+    const tabMap = {
+      new: $("#tab-new"),
+      all: $("#tab-all"),
+      happy: $("#tab-happy"),
+      staff: $("#tab-staff"),
+      orders: $("#tab-orders"),
+    };
+    function setTab(name){
+      $$(".tabbtn").forEach(b=> b.classList.toggle("active", b.dataset.tab===name));
+      Object.entries(tabMap).forEach(([k,el])=> el.style.display = (k===name) ? "block" : "none");
+      hideAlarm();
+      window.scrollTo({top:0, behavior:"smooth"});
     }
+    $$(".tabbtn").forEach(btn=> btn.addEventListener("click", ()=> setTab(btn.dataset.tab)));
 
-    function hideNewReservationOverlay(){
-      newResOverlay.classList.remove("show");
-      newResOverlay.setAttribute("aria-hidden","true");
-      overlayActive = false;
-
-      if(overlayQueue.length){
-        showNewReservationOverlay(overlayQueue[0]);
-        overlayQueue.shift();
-      }
-    }
-
-    acceptNewResBtn?.addEventListener("click", hideNewReservationOverlay);
-    newResOverlay?.addEventListener("click", (e)=>{
-      if(e.target === newResOverlay) hideNewReservationOverlay();
-    });
-
-    // =========================
-    //  Reservations logic
-    // =========================
-    const newListEl = document.getElementById("newReservationsList");
-    const allListEl = document.getElementById("allReservationsList");
-    const statTotal = document.getElementById("statTotal");
-    const statNew = document.getElementById("statNew");
-    const statToday = document.getElementById("statToday");
-    const lastSync = document.getElementById("lastSync");
-
-    let reservations = [];
-    let seenIds = new Set(JSON.parse(localStorage.getItem("seenReservationIds") || "[]"));
-
-    function saveSeen(){
-      localStorage.setItem("seenReservationIds", JSON.stringify([...seenIds]));
-    }
-
-    function isToday(dateStr){
-      const today = new Date().toISOString().split("T")[0];
-      return dateStr === today;
-    }
-
-    function normalizeRes(r){
-      return {
-        id: r.id || r._id || (r.createdAt + "|" + r.phone + "|" + r.date + "|" + r.time),
-        createdAt: r.createdAt || r.created_at || r.created || Date.now(),
-        ...r
-      };
-    }
-
-    function getNotes(r){
-      return (r.notes || r.note || r.uwagi || r.message || "").trim();
-    }
-
-    function sortByNewest(arr){
-      return arr.slice().sort((a,b)=>{
-        const ta = new Date(a.createdAt || 0).getTime();
-        const tb = new Date(b.createdAt || 0).getTime();
-        return tb - ta;
-      });
-    }
-
-    function reservationCardHTML(r, highlightNew){
-      const isNew = !seenIds.has(r.id);
-      const notes = getNotes(r);
-
-      return `
-        <article class="reservation-item ${highlightNew && isNew ? "new" : ""}" data-id="${r.id}">
-          <div>
-            <div style="font-size:1.15rem;font-weight:900;margin-bottom:6px">
-              ${r.name || "—"}
-            </div>
-            <div class="reservation-meta">
-              <span class="tag"><i class="fa-regular fa-calendar"></i> ${r.date || "—"}</span>
-              <span class="tag"><i class="fa-regular fa-clock"></i> ${r.time || "—"}</span>
-              <span class="tag"><i class="fa-solid fa-user-group"></i> ${r.guests || "—"} os.</span>
-              <span class="tag"><i class="fa-solid fa-door-open"></i> ${r.room || "—"}</span>
-              <span class="tag"><i class="fa-solid fa-phone"></i> ${r.phone || "—"}</span>
-            </div>
-            ${notes ? `<div class="reservation-notes"><b>Uwagi:</b> ${notes}</div>` : ""}
-            <div class="small" style="margin-top:6px">
-              ID: ${r.id || "—"} • dodano: ${r.createdAt ? new Date(r.createdAt).toLocaleString() : "—"}
-            </div>
-          </div>
-
-          <div class="reservation-actions">
-            <button class="btn btn-ghost mark-read-btn">
-              <i class="fa-solid fa-check"></i> Przeczytane
-            </button>
-
-            <button class="btn btn-ghost edit-btn">
-              <i class="fa-solid fa-pen-to-square"></i> Edytuj
-            </button>
-
-            <button class="btn btn-primary call-btn">
-              <i class="fa-solid fa-phone"></i> Zadzwoń
-            </button>
-          </div>
-        </article>
-      `;
-    }
-
-    function bindReservationActions(root){
-      // mark as read
-      root.querySelectorAll(".mark-read-btn").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const card = btn.closest(".reservation-item");
-          const id = card.dataset.id;
-          seenIds.add(id);
-          saveSeen();
-          render();
-        });
-      });
-
-      // call
-      root.querySelectorAll(".call-btn").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const card = btn.closest(".reservation-item");
-          const id = card.dataset.id;
-          const r = reservations.find(x=>x.id===id);
-          if(r?.phone) window.location.href = `tel:${r.phone}`;
-        });
-      });
-
-      // edit
-      root.querySelectorAll(".edit-btn").forEach(btn=>{
-        btn.addEventListener("click", ()=>{
-          const card = btn.closest(".reservation-item");
-          const id = card.dataset.id;
-          const r = reservations.find(x=>x.id===id);
-          if(r) openEditReservationModal(r);
-        });
-      });
-
-      // ===== SWIPE/DRAG LEFT to reveal edit =====
-      root.querySelectorAll(".reservation-item").forEach(card=>{
-        let startX = 0;
-        let startY = 0;
-        let dragging = false;
-        let moved = false;
-
-        const onDown = (e)=>{
-          if(e.target.closest("button")) return;
-          dragging = true;
-          moved = false;
-          const p = e.touches ? e.touches[0] : e;
-          startX = p.clientX;
-          startY = p.clientY;
-        };
-
-        const onMove = (e)=>{
-          if(!dragging) return;
-          const p = e.touches ? e.touches[0] : e;
-          const dx = p.clientX - startX;
-          const dy = p.clientY - startY;
-
-          if(Math.abs(dy) > 18 && Math.abs(dy) > Math.abs(dx)){
-            dragging = false;
-            return;
-          }
-
-          if(dx < -60){
-            card.classList.add("swiped");
-            moved = true;
-            dragging = false;
-          }
-
-          if(dx > 40){
-            card.classList.remove("swiped");
-            moved = true;
-            dragging = false;
-          }
-
-          if(moved) e.preventDefault?.();
-        };
-
-        const onUp = ()=>{ dragging = false; };
-
-        card.addEventListener("touchstart", onDown, {passive:true});
-        card.addEventListener("touchmove", onMove, {passive:false});
-        card.addEventListener("touchend", onUp);
-
-        card.addEventListener("pointerdown", onDown);
-        card.addEventListener("pointermove", onMove);
-        card.addEventListener("pointerup", onUp);
-        card.addEventListener("pointercancel", onUp);
-      });
-    }
-
-    function render(){
-      const sorted = sortByNewest(reservations);
-
-      const total = sorted.length;
-      const newCount = sorted.filter(r => !seenIds.has(r.id)).length;
-      const todayCount = sorted.filter(r => isToday(r.date)).length;
-
-      statTotal.textContent = total;
-      statNew.textContent = newCount;
-      statToday.textContent = todayCount;
-
-      const onlyNew = sorted.filter(r => !seenIds.has(r.id));
-      if(!onlyNew.length){
-        newListEl.innerHTML = `<div class="empty">Brak nowych rezerwacji ✅</div>`;
-      } else {
-        newListEl.innerHTML = onlyNew.map(r => reservationCardHTML(r, true)).join("");
-      }
-
-      if(!sorted.length){
-        allListEl.innerHTML = `<div class="empty">Brak rezerwacji.</div>`;
-      } else {
-        allListEl.innerHTML = sorted.map(r => reservationCardHTML(r, false)).join("");
-      }
-
-      bindReservationActions(newListEl);
-      bindReservationActions(allListEl);
-      lastSync.textContent = "Ostatnia synchronizacja: " + new Date().toLocaleString();
-    }
-
-    async function fetchReservationsRaw(){
-      const res = await fetch("/api/rezerwacje", { cache:"no-store" });
-      if(!res.ok) throw new Error(res.status);
-      const data = await res.json();
-      return (data || []).map(normalizeRes);
-    }
-
-    async function fetchReservationsAndMerge({notifyNew=false} = {}){
-      try{
-        const incoming = await fetchReservationsRaw();
-        const prevIds = new Set(reservations.map(r=>r.id));
-        const newOnes = incoming.filter(r=>!prevIds.has(r.id));
-
-        reservations = incoming;
-        render();
-
-        if(notifyNew && newOnes.length){
-          newOnes.forEach(r=>{
-            playBellFor10s();
-            showToast("Nowa rezerwacja 🔔");
-            fireNotification(r);
-            showNewReservationOverlay(r);
-          });
-        }
-      }catch(e){
-        console.error(e);
-        newListEl.innerHTML = `<div class="empty" style="color:#b00000">Nie udało się pobrać rezerwacji.</div>`;
-        allListEl.innerHTML = `<div class="empty" style="color:#b00000">Nie udało się pobrać rezerwacji.</div>`;
-      }
-    }
-
-    function onNewReservation(r){
-      const nr = normalizeRes(r);
-      const exists = reservations.some(x=>x.id === nr.id);
-      if(!exists){
-        reservations.push(nr);
-        render();
-      }
-      playBellFor10s();
-      showToast("Nowa rezerwacja 🔔");
-      fireNotification(nr);
-      showNewReservationOverlay(nr);
-    }
-
-    document.getElementById("refreshBtn").addEventListener("click", ()=>fetchReservationsAndMerge());
-    fetchReservationsAndMerge();
-
-    try{
-      if(window.io){
-        const socket = io();
-        socket.on("connect", ()=> {
-          document.getElementById("liveText").textContent = "LIVE";
-          document.getElementById("liveDot").style.color = "#16A34A";
-        });
-        socket.on("disconnect", ()=> {
-          document.getElementById("liveText").textContent = "OFFLINE";
-          document.getElementById("liveDot").style.color = "#DC2626";
-        });
-
-        socket.on("reservation:new", onNewReservation);
-        socket.on("new-reservation", onNewReservation);
-      }
-    }catch(e){}
-
-    setInterval(()=>fetchReservationsAndMerge({notifyNew:true}), 5000);
-
-    // =========================
-    //  INFO BAR
-    // =========================
-    const infoBarText = document.getElementById("infoBarText");
-    const barStatus = document.getElementById("barStatus");
-    const saveInfoBarBtn = document.getElementById("saveInfoBarBtn");
-    const clearInfoBarBtn = document.getElementById("clearInfoBarBtn");
-
-    async function fetchInfoBar(){
-      try{
-        const res = await fetch("/api/data", { cache:"no-store" });
-        if(!res.ok) throw new Error(res.status);
-        const db = await res.json();
-        const happy = (db.happy || "").trim();
-        infoBarText.value = happy;
-        barStatus.textContent = happy ? "Status: aktywny" : "Status: wyłączony";
-      }catch(e){
-        console.error(e);
-        barStatus.textContent = "Status: błąd pobierania";
-      }
-    }
-
-    async function saveInfoBar(text){
-      const payload = { happy: text };
-      try{
-        const res = await fetch("/api/happy", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
+    // ---------------- API (bez zmian)
+    const API = {
+      async data(){
+        const r = await fetch("/api/data", { cache:"no-store" });
+        if(!r.ok) throw new Error("Błąd /api/data");
+        return await r.json();
+      },
+      async reservations(){
+        const r = await fetch("/api/rezerwacje", { cache:"no-store" });
+        if(!r.ok) throw new Error("Błąd rezerwacji");
+        return await r.json();
+      },
+      async deleteReservation(id){
+        const r = await fetch(`/api/rezerwacje/${encodeURIComponent(id)}`, { method:"DELETE" });
+        if(!r.ok) throw new Error("Błąd usuwania");
+        return await r.json();
+      },
+      async updateReservation(id, payload){
+        const r = await fetch(`/api/rezerwacje/${encodeURIComponent(id)}`,{
+          method:"PUT",
+          headers:{ "Content-Type":"application/json" },
           body: JSON.stringify(payload)
         });
-        return res.ok;
-      }catch(e){
-        return false;
-      }
-    }
-
-    saveInfoBarBtn.addEventListener("click", async ()=>{
-      const text = infoBarText.value.trim();
-      const ok = await saveInfoBar(text);
-      if(ok){
-        showToast(text ? "Pasek zapisany ✅" : "Pasek wyłączony ✅");
-        barStatus.textContent = text ? "Status: aktywny" : "Status: wyłączony";
-      }else{
-        showToast("Nie udało się zapisać paska", true);
-        barStatus.textContent = "Status: błąd zapisu";
-      }
-    });
-
-    clearInfoBarBtn.addEventListener("click", async ()=>{
-      infoBarText.value = "";
-      const ok = await saveInfoBar("");
-      if(ok){
-        showToast("Pasek usunięty ✅");
-        barStatus.textContent = "Status: wyłączony";
-      }else{
-        showToast("Nie udało się usunąć paska", true);
-        barStatus.textContent = "Status: błąd zapisu";
-      }
-    });
-
-    // =========================
-    //  MANUAL ADD RESERVATION
-    // =========================
-    const addReservationBtn = document.getElementById("addReservationBtn");
-    const addReservationModal = document.getElementById("addReservationModal");
-    const closeAddReservationModal = document.getElementById("closeAddReservationModal");
-    const cancelAddReservation = document.getElementById("cancelAddReservation");
-    const addReservationForm = document.getElementById("addReservationForm");
-
-    function openAddReservationModal(){
-      addReservationModal.classList.add("show");
-      addReservationModal.setAttribute("aria-hidden","false");
-      const dateInput = addReservationForm.querySelector('[name="date"]');
-      if(!dateInput.value){
-        dateInput.value = new Date().toISOString().split("T")[0];
-      }
-    }
-
-    function closeAddReservation(){
-      addReservationModal.classList.remove("show");
-      addReservationModal.setAttribute("aria-hidden","true");
-      addReservationForm.reset();
-    }
-
-    addReservationBtn?.addEventListener("click", openAddReservationModal);
-    closeAddReservationModal?.addEventListener("click", closeAddReservation);
-    cancelAddReservation?.addEventListener("click", closeAddReservation);
-
-    addReservationModal?.addEventListener("click", (e)=>{
-      if(e.target === addReservationModal) closeAddReservation();
-    });
-
-    addReservationForm?.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-
-      const fd = new FormData(addReservationForm);
-      const payload = {
-        name: fd.get("name"),
-        phone: fd.get("phone"),
-        date: fd.get("date"),
-        time: fd.get("time"),
-        guests: String(fd.get("guests")),
-        room: fd.get("room"),
-        notes: fd.get("notes") || ""
-      };
-
-      try{
-        const res = await fetch("/api/rezerwacje", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json().catch(()=> ({}));
-
-        if(!res.ok){
-          showToast(data?.message || "Nie udało się dodać rezerwacji", true);
-          return;
+        if(!r.ok){
+          const e = await r.json().catch(()=>({}));
+          throw new Error(e.message || "Błąd edycji");
         }
-
-        showToast("Rezerwacja dodana ✅");
-        closeAddReservation();
-        await fetchReservationsAndMerge();
-
-      }catch(err){
-        console.error(err);
-        showToast("Błąd sieci przy dodawaniu rezerwacji", true);
-      }
-    });
-
-    // =========================
-    //  EDIT RESERVATION MODAL
-    // =========================
-    const editReservationModal = document.getElementById("editReservationModal");
-    const closeEditReservationModal = document.getElementById("closeEditReservationModal");
-    const cancelEditReservation = document.getElementById("cancelEditReservation");
-    const editReservationForm = document.getElementById("editReservationForm");
-
-    function openEditReservationModal(r){
-      editReservationModal.classList.add("show");
-      editReservationModal.setAttribute("aria-hidden","false");
-
-      editReservationForm.elements.id.value = r.id;
-      editReservationForm.elements.name.value = r.name || "";
-      editReservationForm.elements.phone.value = r.phone || "";
-      editReservationForm.elements.date.value = r.date || new Date().toISOString().split("T")[0];
-      editReservationForm.elements.time.value = r.time || "19:30";
-      editReservationForm.elements.guests.value = r.guests || 1;
-      editReservationForm.elements.room.value = r.room || "";
-      editReservationForm.elements.notes.value = getNotes(r) || "";
-    }
-
-    function closeEditReservation(){
-      editReservationModal.classList.remove("show");
-      editReservationModal.setAttribute("aria-hidden","true");
-      editReservationForm.reset();
-    }
-
-    closeEditReservationModal?.addEventListener("click", closeEditReservation);
-    cancelEditReservation?.addEventListener("click", closeEditReservation);
-
-    editReservationModal?.addEventListener("click", (e)=>{
-      if(e.target === editReservationModal) closeEditReservation();
-    });
-
-    editReservationForm?.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-
-      const fd = new FormData(editReservationForm);
-      const id = fd.get("id");
-      const payload = {
-        name: fd.get("name"),
-        phone: fd.get("phone"),
-        date: fd.get("date"),
-        time: fd.get("time"),
-        guests: String(fd.get("guests")),
-        room: fd.get("room"),
-        notes: fd.get("notes") || ""
-      };
-
-      try{
-        const res = await fetch(`/api/rezerwacje/${id}`, {
-          method: "PUT",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify(payload)
+        return await r.json();
+      },
+      async saveHappy(text){
+        const r = await fetch("/api/happy", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ happy: text })
         });
-
-        const data = await res.json().catch(()=> ({}));
-
-        if(!res.ok || data?.ok === false){
-          showToast(data?.message || "Nie udało się zapisać zmian", true);
-          return;
-        }
-
-        await fetchReservationsAndMerge();
-        showToast("Zapisano zmiany ✅");
-        closeEditReservation();
-
-      }catch(err){
-        console.error(err);
-        showToast("Błąd sieci przy edycji", true);
-      }
-    });
-
-    // =========================
-    //  STAFF / EMPLOYEES (API)
-    // =========================
-    const addEmployeeForm = document.getElementById("addEmployeeForm");
-    const employeesListEl = document.getElementById("employeesList");
-    const empHint = document.getElementById("empHint");
-
-    function roleLabel(role){
-      if(role === "manager") return "Właściciel / Menager";
-      return "Pracownik";
-    }
-
-    async function fetchEmployees(){
-      const res = await fetch("/api/pracownicy", { cache:"no-store" });
-      if(!res.ok) throw new Error(res.status);
-      return await res.json();
-    }
-
-    async function renderEmployees(){
-      if(!employeesListEl) return;
-      employeesListEl.innerHTML = `<div class="empty">Ładuję konta...</div>`;
-
-      try{
-        const employees = await fetchEmployees();
-
-        if(!employees.length){
-          employeesListEl.innerHTML = `<div class="empty">Brak kont</div>`;
-          return;
-        }
-
-        employeesListEl.innerHTML = employees.map(e => `
-          <article class="reservation-item" data-id="${e._id}">
-            <div>
-              <div style="font-size:1.05rem;font-weight:900;margin-bottom:6px">
-                ${e.name}
-              </div>
-              <div class="reservation-meta">
-                <span class="tag"><i class="fa-solid fa-key"></i> Login: ${e.pin}</span>
-                <span class="tag"><i class="fa-solid fa-user-tag"></i> ${roleLabel(e.role)}</span>
-                <span class="tag"><i class="fa-regular fa-clock"></i> Dodano: ${new Date(e.createdAt).toLocaleString()}</span>
-              </div>
-            </div>
-
-            <div class="reservation-actions">
-              <button class="btn btn-danger remove-emp-btn">
-                <i class="fa-solid fa-trash"></i> Usuń
-              </button>
-            </div>
-          </article>
-        `).join("");
-
-        employeesListEl.querySelectorAll(".remove-emp-btn").forEach(btn=>{
-          btn.addEventListener("click", async ()=>{
-            const card = btn.closest(".reservation-item");
-            const id = card.dataset.id;
-
-            try{
-              const res = await fetch(`/api/pracownicy/${id}`, { method:"DELETE" });
-              const data = await res.json().catch(()=> ({}));
-              if(!res.ok || !data.ok){
-                showToast(data.message || "Nie udało się usunąć konta", true);
-                return;
-              }
-              showToast("Usunięto konto ✅");
-              renderEmployees();
-            }catch(e){
-              showToast("Błąd sieci przy usuwaniu", true);
-            }
-          });
-        });
-
-      }catch(e){
-        console.error(e);
-        employeesListEl.innerHTML = `<div class="empty" style="color:#b00000">Nie udało się pobrać kont.</div>`;
-      }
-    }
-
-    function normalizePin(pin){
-      return String(pin).replace(/\D/g,"").padStart(4,"0").slice(0,4);
-    }
-
-    addEmployeeForm?.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      const elevated = (currentRole === "owner" || currentRole === "manager");
-      if(!elevated){
-        showToast("Brak dostępu", true);
-        return;
-      }
-
-      const fd = new FormData(addEmployeeForm);
-      const name = String(fd.get("empName") || "").trim();
-      let pin = normalizePin(fd.get("empPin"));
-      const role = String(fd.get("empRole") || "employee");
-
-      empHint.textContent = "";
-
-      try{
-        const res = await fetch("/api/pracownicy", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
+        if(!r.ok) throw new Error("Błąd zapisu paska");
+        return await r.json();
+      },
+      async employees(){
+        const r = await fetch("/api/pracownicy", { cache:"no-store" });
+        if(!r.ok) throw new Error("Błąd pracowników");
+        return await r.json();
+      },
+      async addEmployee({name,pin,role}){
+        const r = await fetch("/api/pracownicy", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
           body: JSON.stringify({ name, pin, role })
         });
-        const data = await res.json().catch(()=> ({}));
-
-        if(!res.ok || !data.ok){
-          empHint.textContent = data.message || "Błąd dodawania konta.";
-          showToast(data.message || "Nie udało się dodać konta", true);
-          return;
+        if(!r.ok){
+          const e = await r.json().catch(()=>({}));
+          throw new Error(e.message || "Błąd dodawania");
         }
-
-        showToast("Dodano konto ✅");
-        addEmployeeForm.reset();
-        renderEmployees();
-      }catch(err){
-        console.error(err);
-        showToast("Błąd sieci przy dodawaniu", true);
+        return await r.json();
+      },
+      async deleteEmployee(id){
+        const r = await fetch(`/api/pracownicy/${encodeURIComponent(id)}`, { method:"DELETE" });
+        if(!r.ok) throw new Error("Błąd usuwania");
+        return await r.json();
+      },
+      async orders(){
+        const r = await fetch("/api/admin/orders", { cache:"no-store" });
+        if(!r.ok) throw new Error("Błąd zamówień");
+        return await r.json();
       }
-    });
+    };
 
-    // na starcie: ukryj elevated-only/milk-only
-    applyRoleVisibility();
+    // ---------------- State
+    const state = {
+      reservations: [],
+      orders: [],
+      happy: "",
+      employees: []
+    };
 
-    // =========================
-    //  MILK APP (pin 0051 only)
-    // =========================
-    const milkStatus = document.getElementById("milkStatus");
+    // ---------------- Render Reservations
+    function renderNew(){
+      const body = $("#newBody");
+      const list = (state.reservations || []).slice(0, 12);
+      if(!list.length){
+        body.innerHTML = `<tr><td colspan="5" class="muted">Brak rezerwacji.</td></tr>`;
+        return;
+      }
+      body.innerHTML = list.map(r => rowRes(r)).join("");
+      wireResActions(body);
+    }
 
-    // milk subtabs switch
-    const milkSubtabBtns = document.querySelectorAll("[data-milk-tab]");
-    const milkPanels = document.querySelectorAll(".milk-panel");
-    milkSubtabBtns.forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        milkSubtabBtns.forEach(b=>b.classList.remove("active"));
-        milkPanels.forEach(p=>p.classList.remove("active"));
-        btn.classList.add("active");
-        document.getElementById(btn.dataset.milkTab).classList.add("active");
+    function rowRes(r){
+      const src = (r.source === "app") ? `<span class="tag pending"><i class="fa-solid fa-mobile-screen"></i> app</span>` : `<span class="tag ok"><i class="fa-solid fa-globe"></i> index</span>`;
+      return `
+        <tr>
+          <td>${esc(formatDateTime(r.createdAt))}<div style="margin-top:6px">${src}</div></td>
+          <td><b>${esc(r.name)}</b><div class="muted">${esc(r.phone)}</div></td>
+          <td><b>${esc(r.date)} • ${esc(r.time)}</b></td>
+          <td>${esc(r.guests)} os. • ${esc(r.room)}${r.notes ? `<div class="muted" style="margin-top:6px">Uwagi: ${esc(r.notes)}</div>` : ""}</td>
+          <td class="right">
+            <button class="btn btn-small" data-view="${esc(r._id)}"><i class="fa-solid fa-eye"></i></button>
+            <button class="btn btn-small" data-edit="${esc(r._id)}"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-small btn-danger" data-del="${esc(r._id)}"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>
+      `;
+    }
+
+    function wireResActions(scope){
+      scope.querySelectorAll("[data-view]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.dataset.view;
+          const r = state.reservations.find(x=>String(x._id)===String(id));
+          if(!r) return;
+          openModal("Szczegóły rezerwacji", `
+            <div class="card" style="box-shadow:none;border:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.94)">
+              <div style="display:grid;gap:8px">
+                <div><b>Imię:</b> ${esc(r.name)}</div>
+                <div><b>Telefon:</b> ${esc(r.phone)}</div>
+                <div><b>Termin:</b> ${esc(r.date)} • ${esc(r.time)}</div>
+                <div><b>Osoby:</b> ${esc(r.guests)}</div>
+                <div><b>Strefa:</b> ${esc(r.room)}</div>
+                <div><b>Źródło:</b> ${esc(r.source || "index")}</div>
+                ${r.notes ? `<div><b>Uwagi:</b> ${esc(r.notes)}</div>` : ""}
+              </div>
+            </div>
+          `);
+        });
       });
-    });
 
-    async function milkFetch(url, opts={}){
-      const res = await fetch(url, { cache:"no-store", ...opts });
-      const data = await res.json().catch(()=> ({}));
-      if(!res.ok) throw new Error(data?.message || res.status);
-      return data;
+      scope.querySelectorAll("[data-edit]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const id = b.dataset.edit;
+          const r = state.reservations.find(x=>String(x._id)===String(id));
+          if(!r) return;
+
+          openModal("Edytuj rezerwację", `
+            <div class="row">
+              <div><label>Imię i nazwisko</label><input id="eName" value="${esc(r.name)}"></div>
+              <div><label>Telefon</label><input id="ePhone" value="${esc(r.phone)}"></div>
+            </div>
+            <div class="row">
+              <div><label>Data</label><input id="eDate" type="date" value="${esc(r.date)}"></div>
+              <div><label>Godzina</label><input id="eTime" type="time" value="${esc(r.time)}"></div>
+            </div>
+            <div class="row">
+              <div><label>Ilość osób</label><input id="eGuests" value="${esc(r.guests)}"></div>
+              <div><label>Strefa</label><input id="eRoom" value="${esc(r.room)}"></div>
+            </div>
+            <div>
+              <label>Uwagi</label>
+              <textarea id="eNotes">${esc(r.notes || "")}</textarea>
+            </div>
+            <button class="btn btn-primary" id="saveEdit"><i class="fa-solid fa-floppy-disk"></i> Zapisz zmiany</button>
+          `);
+
+          $("#saveEdit").addEventListener("click", async ()=>{
+            try{
+              await API.updateReservation(id, {
+                name: $("#eName").value.trim(),
+                phone: $("#ePhone").value.trim(),
+                date: $("#eDate").value,
+                time: $("#eTime").value,
+                guests: $("#eGuests").value.trim(),
+                room: $("#eRoom").value.trim(),
+                notes: $("#eNotes").value
+              });
+              overlay.classList.remove("show");
+              toast("Zapisano ✅");
+              await refreshReservations();
+            }catch(e){
+              toast("Błąd: " + e.message, true);
+            }
+          });
+        });
+      });
+
+      scope.querySelectorAll("[data-del]").forEach(b=>{
+        b.addEventListener("click", async ()=>{
+          const id = b.dataset.del;
+          const r = state.reservations.find(x=>String(x._id)===String(id));
+          if(!r) return;
+          if(!confirm(`Usunąć rezerwację: ${r.name} / ${r.date} ${r.time}?`)) return;
+          try{
+            await API.deleteReservation(id);
+            toast("Usunięto");
+            await refreshReservations();
+          }catch(e){
+            toast("Błąd: " + e.message, true);
+          }
+        });
+      });
     }
 
-    // ---------- STATS ----------
-    const milkStatUsers = document.getElementById("milkStatUsers");
-    const milkStatPoints = document.getElementById("milkStatPoints");
-    const milkStatRedeems = document.getElementById("milkStatRedeems");
+    function renderAll(){
+      const body = $("#allBody");
+      const q = ($("#resSearch").value || "").trim().toLowerCase();
+      const src = $("#resSource").value;
 
-    async function milkLoadStats(){
-      try{
-        milkStatus.textContent = "Status: ładowanie...";
-        const stats = await milkFetch("/api/milk/stats");
-        milkStatUsers.textContent = stats.users ?? 0;
-        milkStatPoints.textContent = stats.pointsTotal ?? 0;
-        milkStatRedeems.textContent = stats.redeems ?? 0;
-        milkStatus.textContent = "Status: OK";
-      }catch(e){
-        console.error(e);
-        milkStatus.textContent = "Status: błąd stats";
+      let list = [...(state.reservations || [])];
+      if(src) list = list.filter(r => String(r.source||"index") === src);
+
+      if(q){
+        list = list.filter(r => {
+          const blob = [r.name,r.phone,r.date,r.time,r.guests,r.room,r.notes,r.source].join(" ").toLowerCase();
+          return blob.includes(q);
+        });
       }
-    }
-    document.getElementById("milkRefreshStats")?.addEventListener("click", milkLoadStats);
 
-    // ---------- ADD POINTS (10 zł = 1 Milkos) ----------
-    const milkAddPointsForm = document.getElementById("milkAddPointsForm");
-    const milkOpenAddPoints = document.getElementById("milkOpenAddPoints");
-    const milkPointsPreview = document.getElementById("milkPointsPreview");
-
-    milkOpenAddPoints?.addEventListener("click", ()=>{
-      document.querySelector('[data-milk-tab="milk-points"]')?.click();
-      milkAddPointsForm?.elements.userId?.focus();
-    });
-
-    milkAddPointsForm?.elements.amount?.addEventListener("input", ()=>{
-      const amount = parseFloat(milkAddPointsForm.elements.amount.value || "0");
-      const milkosy = Math.floor(amount / 10);
-      milkPointsPreview.textContent = `Milkosy do dodania: ${milkosy}`;
-    });
-
-    milkAddPointsForm?.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      const fd = new FormData(milkAddPointsForm);
-      const userId = String(fd.get("userId")||"").trim();
-      const amount = parseFloat(fd.get("amount")||"0");
-      const milkosy = Math.floor(amount / 10);
-
-      if(!milkosy){
-        showToast("Kwota za mała na Milkosy", true);
+      if(!list.length){
+        body.innerHTML = `<tr><td colspan="5" class="muted">Brak wyników.</td></tr>`;
         return;
       }
 
+      body.innerHTML = list.map(r => rowRes(r)).join("");
+      wireResActions(body);
+    }
+
+    $("#resSearch").addEventListener("input", renderAll);
+    $("#resSource").addEventListener("change", renderAll);
+
+    async function refreshHappyFromData(){
       try{
-        await milkFetch("/api/milk/points/add", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ userId, amount, points: milkosy })
-        });
-        showToast(`Dodano ${milkosy} Milkosów ✅`);
-        milkAddPointsForm.reset();
-        milkPointsPreview.textContent = "Milkosy do dodania: —";
-        milkLoadStats();
-        milkLoadUsers();
-      }catch(err){
-        showToast("Nie udało się dodać Milkosów", true);
+        const d = await API.data();
+        state.happy = d.happy || "";
+        $("#happyText").value = state.happy;
+        $("#happyState").textContent = "Wczytano.";
+      }catch(e){
+        $("#happyState").textContent = "Błąd: " + e.message;
+      }
+    }
+
+    $("#saveHappy").addEventListener("click", async ()=>{
+      $("#happyState").textContent = "Zapisywanie…";
+      try{
+        const txt = $("#happyText").value || "";
+        await API.saveHappy(txt);
+        $("#happyState").textContent = "Zapisano ✅";
+        toast("Zapisano pasek");
+      }catch(e){
+        $("#happyState").textContent = "Błąd: " + e.message;
+        toast("Błąd: " + e.message, true);
       }
     });
 
-    // ---------- REWARDS ----------
-    const milkAddRewardForm = document.getElementById("milkAddRewardForm");
-    const milkRewardsList = document.getElementById("milkRewardsList");
-    const milkRewardHint = document.getElementById("milkRewardHint");
-
-    function rewardCardHTML(r){
-      return `
-        <article class="milk-list-item" data-id="${r.id || r._id}">
-          <div>
-            <div style="font-weight:900; font-size:1.05rem;">${r.title}</div>
-            <div class="reservation-meta" style="margin-top:6px;">
-              <span class="tag"><i class="fa-solid fa-coins"></i> ${r.cost} Milkosów</span>
-              ${r.desc ? `<span class="tag"><i class="fa-regular fa-note-sticky"></i> ${r.desc}</span>` : ""}
-            </div>
-          </div>
-          <div class="milk-list-actions">
-            <button class="btn btn-danger milk-remove-reward">
-              <i class="fa-solid fa-trash"></i> Usuń
-            </button>
-          </div>
-        </article>
-      `;
-    }
-
-    async function milkLoadRewards(){
+    async function refreshEmployees(){
       try{
-        milkRewardsList.innerHTML = `<div class="empty">Ładuję nagrody...</div>`;
-        const rewards = await milkFetch("/api/milk/rewards");
-        if(!rewards.length){
-          milkRewardsList.innerHTML = `<div class="empty">Brak nagród</div>`;
+        state.employees = await API.employees();
+        const body = $("#empBody");
+        if(!state.employees.length){
+          body.innerHTML = `<tr><td colspan="4" class="muted">Brak pracowników.</td></tr>`;
           return;
         }
-        milkRewardsList.innerHTML = rewards.map(rewardCardHTML).join("");
+        body.innerHTML = state.employees.map(e=>`
+          <tr>
+            <td><b>${esc(e.name)}</b></td>
+            <td class="mono">${esc(e.pin)}</td>
+            <td>${esc(e.role)}</td>
+            <td class="right">
+              <button class="btn btn-small btn-danger" data-del-emp="${esc(e._id)}"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        `).join("");
 
-        milkRewardsList.querySelectorAll(".milk-remove-reward").forEach(btn=>{
-          btn.addEventListener("click", async ()=>{
-            const card = btn.closest(".milk-list-item");
-            const id = card.dataset.id;
+        body.querySelectorAll("[data-del-emp]").forEach(b=>{
+          b.addEventListener("click", async ()=>{
+            if(!confirm("Usunąć pracownika?")) return;
             try{
-              await milkFetch(`/api/milk/rewards/${id}`, { method:"DELETE" });
-              showToast("Usunięto nagrodę ✅");
-              milkLoadRewards();
+              await API.deleteEmployee(b.dataset.delEmp);
+              toast("Usunięto");
+              refreshEmployees();
             }catch(e){
-              showToast("Nie udało się usunąć nagrody", true);
+              toast("Błąd: " + e.message, true);
             }
           });
         });
-
       }catch(e){
-        console.error(e);
-        milkRewardsList.innerHTML = `<div class="empty" style="color:#b00000">Błąd pobierania nagród</div>`;
+        $("#empBody").innerHTML = `<tr><td colspan="4" class="muted">Błąd: ${esc(e.message)}</td></tr>`;
       }
     }
 
-    milkAddRewardForm?.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      milkRewardHint.textContent = "";
-      const fd = new FormData(milkAddRewardForm);
-      const payload = {
-        title: String(fd.get("title")||"").trim(),
-        cost: parseInt(fd.get("cost")||"0",10),
-        desc: String(fd.get("desc")||"").trim()
-      };
-
+    $("#addEmp").addEventListener("click", async ()=>{
+      $("#empState").textContent = "Dodawanie…";
       try{
-        await milkFetch("/api/milk/rewards", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify(payload)
+        await API.addEmployee({
+          name: $("#empName").value,
+          pin: $("#empPin").value,
+          role: $("#empRole").value
         });
-        showToast("Dodano nagrodę ✅");
-        milkAddRewardForm.reset();
-        milkLoadRewards();
+        $("#empState").textContent = "Dodano ✅";
+        $("#empName").value = "";
+        $("#empPin").value = "";
+        toast("Dodano pracownika");
+        refreshEmployees();
       }catch(e){
-        milkRewardHint.textContent = "Błąd dodania nagrody.";
-        showToast("Nie udało się dodać nagrody", true);
+        $("#empState").textContent = "Błąd: " + e.message;
+        toast("Błąd: " + e.message, true);
       }
     });
 
-    // ---------- USERS + HISTORY ----------
-    const milkUsersList = document.getElementById("milkUsersList");
-    const milkUserModal = document.getElementById("milkUserModal");
-    const milkCloseUserModal = document.getElementById("milkCloseUserModal");
-    const milkUserModalBody = document.getElementById("milkUserModalBody");
-
-    function userRowHTML(u){
-      return `
-        <article class="milk-list-item milk-user-row" data-id="${u.id}">
-          <div>
-            <div style="font-weight:900;">${u.username || u.name || "Użytkownik"}</div>
-            <div class="reservation-meta" style="margin-top:6px;">
-              <span class="tag"><i class="fa-solid fa-id-card"></i> ID: ${u.id}</span>
-              <span class="tag"><i class="fa-solid fa-coins"></i> ${u.points || 0} Milkosów</span>
-            </div>
-          </div>
-          <div class="milk-muted">Podgląd →</div>
-        </article>
-      `;
+    function formatPLN(n){
+      const v = Number(n || 0);
+      return v.toLocaleString("pl-PL", { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + " zł";
     }
 
-    async function milkLoadUsers(){
-      try{
-        milkUsersList.innerHTML = `<div class="empty">Ładuję użytkowników...</div>`;
-        const users = await milkFetch("/api/milk/users");
-        if(!users.length){
-          milkUsersList.innerHTML = `<div class="empty">Brak użytkowników</div>`;
-          return;
-        }
-
-        milkUsersList.innerHTML = users.map(userRowHTML).join("");
-
-        milkUsersList.querySelectorAll(".milk-user-row").forEach(row=>{
-          row.addEventListener("click", async ()=>{
-            const id = row.dataset.id;
-            try{
-              const detail = await milkFetch(`/api/milk/users/${id}`);
-              openMilkUserModal(detail);
-            }catch(e){
-              showToast("Nie udało się pobrać użytkownika", true);
-            }
-          });
-        });
-
-      }catch(e){
-        milkUsersList.innerHTML = `<div class="empty" style="color:#b00000">Błąd pobierania użytkowników</div>`;
+    function renderOrders(){
+      const body = $("#ordersBody");
+      const list = (state.orders || []).slice(0, 80);
+      if(!list.length){
+        body.innerHTML = `<tr><td colspan="6" class="muted">Brak zamówień.</td></tr>`;
+        return;
       }
-    }
+      body.innerHTML = list.map(o=>`
+        <tr>
+          <td>${esc(formatDateTime(o.createdAt))}</td>
+          <td class="mono">${esc(o.milkId || "—")}</td>
+          <td>${esc(o.pickupLocation || "—")} • ${esc(o.pickupTime || "—")}</td>
+          <td class="right mono">${esc(formatPLN(o.total))}</td>
+          <td class="right">${statusTag(o.status)}</td>
+          <td class="right">
+            <button class="btn btn-small" data-view-order="${esc(o.id)}"><i class="fa-solid fa-eye"></i></button>
+            <a class="btn btn-small" href="appadmin.html?tab=orders" title="Otwórz Panel aplikacji"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+          </td>
+        </tr>
+      `).join("");
 
-    function openMilkUserModal(detail){
-      const u = detail.user || detail;
-      const history = detail.history || [];
-
-      milkUserModalBody.innerHTML = `
-        <div class="stat">
-          <div>${u.username || u.name || "Użytkownik"}<br><small>ID: ${u.id}</small></div>
-          <div>${u.points || 0} Milkosów</div>
-        </div>
-
-        <div class="section-title" style="font-size:1.05rem;">Ostatnie wymiany nagród</div>
-        ${
-          history.length
-            ? history.map(h=>`
-              <div class="reservation-item">
-                <div>
-                  <div style="font-weight:900;">${h.rewardTitle || "Nagroda"}</div>
-                  <div class="reservation-meta" style="margin-top:6px;">
-                    <span class="tag"><i class="fa-regular fa-clock"></i> ${new Date(h.createdAt||Date.now()).toLocaleString()}</span>
-                    <span class="tag"><i class="fa-solid fa-coins"></i> -${h.cost || 0} Milkosów</span>
-                    ${h.code ? `<span class="tag"><i class="fa-solid fa-ticket"></i> Kod: ${h.code}</span>` : ""}
-                  </div>
+      body.querySelectorAll("[data-view-order]").forEach(b=>{
+        b.addEventListener("click", ()=>{
+          const o = state.orders.find(x=>String(x.id)===String(b.dataset.viewOrder));
+          if(!o) return;
+          const items = (o.items || []).map(i => `• ${esc(i.qty)}x ${esc(i.title)} (${esc(formatPLN(i.price))})`).join("<br>");
+          openModal("Szczegóły zamówienia", `
+            <div class="card" style="box-shadow:none;border:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.94)">
+              <div style="display:grid;gap:8px">
+                <div><b>ID:</b> <span class="mono">${esc(o.id)}</span></div>
+                <div><b>Milk ID:</b> <span class="mono">${esc(o.milkId || "—")}</span></div>
+                <div><b>Data:</b> ${esc(formatDateTime(o.createdAt))}</div>
+                <div><b>Lokal:</b> ${esc(o.pickupLocation || "—")} • ${esc(o.pickupTime || "—")}</div>
+                <div><b>Status:</b> ${statusTag(o.status)}</div>
+                <div><b>Pozycje:</b><br>${items || "—"}</div>
+                <div style="border-top:1px dashed rgba(0,0,0,.10);padding-top:10px;display:flex;justify-content:space-between">
+                  <b>Suma</b> <b class="mono">${esc(formatPLN(o.total))}</b>
                 </div>
+                <a class="btn btn-primary" href="appadmin.html?tab=orders">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i> Przejdź do Panelu aplikacji (Zamówienia)
+                </a>
               </div>
-            `).join("")
-            : `<div class="empty">Brak wymian</div>`
-        }
-      `;
-
-      milkUserModal.classList.add("show");
-      milkUserModal.setAttribute("aria-hidden","false");
-    }
-
-    function closeMilkUserModal(){
-      milkUserModal.classList.remove("show");
-      milkUserModal.setAttribute("aria-hidden","true");
-    }
-    milkCloseUserModal?.addEventListener("click", closeMilkUserModal);
-    milkUserModal?.addEventListener("click", (e)=>{
-      if(e.target === milkUserModal) closeMilkUserModal();
-    });
-
-    // ---------- PICKUP BY CODE ----------
-    const milkPickupForm = document.getElementById("milkPickupForm");
-    const milkPickupResult = document.getElementById("milkPickupResult");
-
-    milkPickupForm?.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      milkPickupResult.textContent = "Sprawdzam kod...";
-      const code = String(new FormData(milkPickupForm).get("code")||"").trim();
-
-      try{
-        const out = await milkFetch("/api/milk/redeems/verify", {
-          method:"POST",
-          headers:{ "Content-Type":"application/json" },
-          body: JSON.stringify({ code })
+            </div>
+          `);
         });
+      });
+    }
 
-        milkPickupResult.innerHTML = `
-          <div class="stat">
-            <div>Nagroda</div>
-            <div>${out.rewardTitle || "—"}</div>
-          </div>
-          <div class="small">Użytkownik: ${out.userId || "—"}</div>
-          <div class="small">Status: ${out.used ? "JUŻ ODEBRANA" : "DO ODBIORU"}</div>
-        `;
+    async function refreshReservations(){
+      state.reservations = await API.reservations();
+      renderNew();
+      renderAll();
+    }
 
-        if(!out.used){
-          showToast("Kod poprawny ✅ Można wydać nagrodę");
-        }else{
-          showToast("Kod już wykorzystany", true);
-        }
+    async function refreshOrders(){
+      state.orders = await API.orders();
+      renderOrders();
+    }
 
-      }catch(err){
-        milkPickupResult.textContent = "Niepoprawny kod lub błąd serwera.";
-        showToast("Niepoprawny kod", true);
+    async function refreshAll(){
+      try{
+        await refreshReservations();
+        await refreshOrders();
+        await refreshHappyFromData();
+        await refreshEmployees();
+        toast("Odświeżono");
+      }catch(e){
+        toast("Błąd odświeżania: " + e.message, true);
       }
-    });
+    }
+    $("#refreshBtn").addEventListener("click", refreshAll);
 
-    // ---------- init when tab opened ----------
-    document.getElementById("milkTabBtn")?.addEventListener("click", ()=>{
-      milkLoadStats();
-      milkLoadRewards();
-      milkLoadUsers();
-    });
+    // ---------------- Socket realtime + alarm
+    let socket = null;
+
+    function alarmReservation(r){
+      showAlarm({
+        title: "NOWA REZERWACJA!",
+        html: `
+          <div><b>${esc(r.name)}</b> • ${esc(r.phone)}</div>
+          <div><b>${esc(r.date)} • ${esc(r.time)}</b></div>
+          <div>${esc(r.guests)} os. • ${esc(r.room)}</div>
+          ${r.notes ? `<div style="margin-top:6px"><b>Uwagi:</b> ${esc(r.notes)}</div>` : ""}
+          <div style="margin-top:8px" class="muted">Źródło: <b>${esc(r.source || "index")}</b></div>
+        `,
+        actionsHtml: `
+          <button class="btn btn-primary" id="goRes"><i class="fa-solid fa-list"></i> Przejdź do rezerwacji</button>
+          <button class="btn" id="onlyOk"><i class="fa-solid fa-check"></i> OK</button>
+        `
+      });
+
+      setTimeout(()=>{
+        $("#goRes")?.addEventListener("click", ()=>{
+          setTab("new");
+          hideAlarm();
+        });
+        $("#onlyOk")?.addEventListener("click", hideAlarm);
+      },0);
+    }
+
+    function alarmOrder(o){
+      showAlarm({
+        title: "NOWE ZAMÓWIENIE!",
+        html: `
+          <div><b>Lokal:</b> ${esc(o.pickupLocation || "—")} • <b>Odbiór:</b> ${esc(o.pickupTime || "—")}</div>
+          <div><b>Milk ID:</b> <span class="mono">${esc(o.milkId || "—")}</span></div>
+          <div><b>Suma:</b> ${esc(formatPLN(o.total))} • ${statusTag(o.status)}</div>
+          <div style="margin-top:8px"><b>Pozycje:</b><br>${esc((o.items||[]).map(i=>`${i.qty}x ${i.title}`).join(", "))}</div>
+          ${o.notes ? `<div style="margin-top:8px"><b>Uwagi:</b> ${esc(o.notes)}</div>` : ""}
+        `,
+        actionsHtml: `
+          <button class="btn btn-primary" id="goOrders"><i class="fa-solid fa-bag-shopping"></i> Podgląd zamówień</button>
+          <a class="btn btn-primary" id="goAppOrders" href="appadmin.html?tab=orders"><i class="fa-solid fa-arrow-up-right-from-square"></i> Otwórz panel aplikacji</a>
+          <button class="btn" id="onlyOk2"><i class="fa-solid fa-check"></i> OK</button>
+        `
+      });
+
+      setTimeout(()=>{
+        $("#goOrders")?.addEventListener("click", ()=>{
+          setTab("orders");
+          hideAlarm();
+        });
+        $("#onlyOk2")?.addEventListener("click", hideAlarm);
+      },0);
+    }
+
+    function initSocket(){
+      if(socket) return;
+      socket = io();
+
+      socket.on("new-reservation", (r)=>{
+        alarmReservation(r);
+        refreshReservations().catch(()=>{});
+      });
+
+      socket.on("new-order", (o)=>{
+        alarmOrder(o);
+        refreshOrders().catch(()=>{});
+      });
+
+      socket.on("happy-updated", (text)=>{
+        $("#happyText").value = text || "";
+        toast("Happy bar zaktualizowany");
+      });
+    }
+
+    // START (od razu, bez logowania)
+    initSocket();
+    refreshAll();
   </script>
 </body>
 </html>
